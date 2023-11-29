@@ -5,14 +5,15 @@ import java.awt.event.ActionListener;
 import java.util.*;
 //From the main page, the user can search for books or open the checkout and rentals pages, or create a new borrower entry in the database.
 public class MainPage {
-	static JFrame window = new JFrame();
-	static JTextField searchEntry = new JTextField();
-	static ArrayList<Book> searchResults = new ArrayList<Book>();
-	static int currentPageNo = 0;
-	static int totalPageNo = 0;
-	static JLabel pageNo = new JLabel("Page 1 of 1");
-	static JPanel[] displayPanels = new JPanel[10];
-	static JLabel queryDisplay = new JLabel("");
+	private static JFrame window = new JFrame();
+	private static JTextField searchEntry = new JTextField();
+	private static ArrayList<Book> searchResults = new ArrayList<Book>();
+	private static ArrayList<Book> checkoutCart = new ArrayList<Book>();
+	private static int currentPageNo = 0;
+	private static int totalPageNo = 0;
+	private static JLabel pageNo = new JLabel("Page 1 of 1");
+	private static JPanel[] displayPanels = new JPanel[10];
+	private static JLabel queryDisplay = new JLabel("");
 	public static void main(String args[]) {
 		JButton newUser = new JButton("Create Account");
 		JButton rentals = new JButton("View my rentals");
@@ -189,9 +190,8 @@ public class MainPage {
 			displayPanels[i].removeAll();
 		}
 		for (int i = 0; i < 10; i++) {
-			if ((currentPageNo)*10+i < searchResults.size()) {
-				BookPage book = new BookPage(searchResults.get((currentPageNo)*10+i)); 
-				book.display(displayPanels[i]);
+			if (currentPageNo*10+i < searchResults.size()) {
+				displayBook(displayPanels[i], currentPageNo*10+i); 
 				displayPanels[i].setVisible(true);
 				displayPanels[i].repaint();
 			}
@@ -203,11 +203,11 @@ public class MainPage {
 	}
 	
 	
-	static JFrame newBorrower = new JFrame();
-	static JTextField nameField = new JTextField();
-	static JTextField ssnField = new JTextField();
-	static JTextField addressField = new JTextField();
-	static JTextField phoneField = new JTextField();
+	private static JFrame newBorrower = new JFrame();
+	private static JTextField nameField = new JTextField();
+	private static JTextField ssnField = new JTextField();
+	private static JTextField addressField = new JTextField();
+	private static JTextField phoneField = new JTextField();
 	public static void createBorrower() {
 		
 		JLabel nameLabel = new JLabel("Name:");
@@ -269,4 +269,54 @@ public class MainPage {
 		newBorrower.setLayout(null);
 		newBorrower.setVisible(true);
 	}
+	
+	public static void displayBook(JPanel displayBox, int i) {
+		final int index = i;
+		//JLabels used to display book info
+		JLabel title = new JLabel(searchResults.get(index).getTitle());
+		displayBox.add(title);
+		
+		JLabel author = new JLabel("Author: "+searchResults.get(index).getAuthor());
+		displayBox.add(author);
+		
+		JLabel isbn = new JLabel("ISBN: "+searchResults.get(index).getisbn());
+		displayBox.add(isbn);
+		
+		String statusString = "";
+		if (!searchResults.get(index).getStatus()) {
+			statusString = "Available for checkout";
+		}
+		else {
+			statusString = "Checked out";
+		}
+		JLabel status = new JLabel(statusString);
+		displayBox.add(status);
+		
+		//rent button will create a new window notifying user of success/failure
+		JButton rent = new JButton("Borrow this book");
+		displayBox.add(rent);		
+		rent.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JFrame popupWindow = new JFrame();
+				String messageText = "";
+				if(searchResults.get(index).getStatus()) {
+					messageText = ("This book is unavailable");
+				}
+				else if (checkoutCart.size() >= 3) {
+					messageText = ("You cannot rent more than 3 books");
+				}
+				else {
+					messageText = (searchResults.get(index).getTitle()+" added to cart. Checkout with your library card");
+					searchResults.get(index).checkout();
+					checkoutCart.add(searchResults.get(index));
+				}
+				JLabel message = new JLabel(messageText);
+				message.setBounds(20, 20, 350, 50);
+				popupWindow.add(message);
+				popupWindow.setSize(500, 200);
+				popupWindow.setLayout(null);
+				popupWindow.setVisible(true);
+			}
+		});
+	};
 }
