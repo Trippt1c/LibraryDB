@@ -26,6 +26,11 @@ public class MainPage {
 		
 		newUser.setBounds(10,10, 150, 20);
 		window.add(newUser);
+		newUser.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				createBorrower();
+			}
+		});
 		
 		rentals.setBounds(200,10, 150, 20);
 		window.add(rentals);
@@ -52,26 +57,13 @@ public class MainPage {
 		search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String query = searchEntry.getText();
-				if (query != "") {
-					currentPageNo = 0;
-					getSearchResults(query);
-					displaySearchResults();
-					int pageNoPlus1 = currentPageNo + 1;
-					int totalPlus1 = totalPageNo + 1;
-					pageNo.setText("Page "+pageNoPlus1+" of "+totalPlus1);
-					queryDisplay.setText("Showing results for: "+query);
-				}
-			}
-		});
-		
-		
-		
-		checkout.setBounds(400, 10, 150, 20);
-		window.add(checkout);
-		checkout.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				displayLoginWindow();
-				//TODO create a new class to handle the user's checkout page
+				currentPageNo = 0;
+				getSearchResults(query);
+				displaySearchResults();
+				int pageNoPlus1 = currentPageNo + 1;
+				int totalPlus1 = totalPageNo + 1;
+				pageNo.setText("Page "+pageNoPlus1+" of "+totalPlus1);
+				queryDisplay.setText("Showing results for: "+query);
 			}
 		});
 		
@@ -208,5 +200,73 @@ public class MainPage {
 				displayPanels[i].repaint();
 			}
 		}
+	}
+	
+	
+	static JFrame newBorrower = new JFrame();
+	static JTextField nameField = new JTextField();
+	static JTextField ssnField = new JTextField();
+	static JTextField addressField = new JTextField();
+	static JTextField phoneField = new JTextField();
+	public static void createBorrower() {
+		
+		JLabel nameLabel = new JLabel("Name:");
+		nameLabel.setBounds(10, 20, 100, 20);
+		newBorrower.add(nameLabel);
+		nameField.setBounds(10, 40, 300, 20);
+		newBorrower.add(nameField);
+		JLabel ssnLabel = new JLabel("SSN:");
+		ssnLabel.setBounds(10, 60, 300, 20);
+		newBorrower.add(ssnLabel);
+		ssnField.setBounds(10, 80, 300, 20);
+		newBorrower.add(ssnField);
+		JLabel addressLabel = new JLabel("Address:");
+		addressLabel.setBounds(10, 100, 300, 20);
+		newBorrower.add(addressLabel);
+		addressField.setBounds(10, 120, 300, 20);
+		newBorrower.add(addressField);
+		JLabel phoneLabel = new JLabel("Phone number:");
+		phoneLabel.setBounds(10, 140, 300, 20);
+		newBorrower.add(phoneLabel);
+		phoneField.setBounds(10, 160, 300, 20);
+		newBorrower.add(phoneField);
+		JButton submit = new JButton("Submit");
+		submit.setBounds(10, 190, 300, 20);
+		newBorrower.add(submit);
+		
+		submit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String borrowerName = nameField.getText();
+				String borrowerssn = ssnField.getText();
+				String borrowerAddress = addressField.getText();
+				String borrowerPhone = phoneField.getText();
+				String libraryCard = "12345678";
+				String responseMessage = "";
+				newBorrower.setVisible(false);
+				
+				
+				//TODO create new entry in database using given data and newly generated library card if the ssn is unique
+				//and replace this if statement with code that checks if the ssn is unique
+				if (borrowerssn .equals("123456")) {
+					responseMessage = "Error: That SSN already exists within the database.";
+				}
+				else {
+					responseMessage = ("Account created. Your library card number is: "+libraryCard);
+				}
+				
+				newBorrower.setVisible(false);
+				JFrame responseWindow = new JFrame();
+				JLabel responseLabel = new JLabel(responseMessage);
+				responseLabel.setBounds(20, 20, 350, 50);
+				responseWindow.add(responseLabel);
+				responseWindow.setSize(500, 200);
+				responseWindow.setLayout(null);
+				responseWindow.setVisible(true);
+			}
+		});
+		
+		newBorrower.setSize(500, 700);
+		newBorrower.setLayout(null);
+		newBorrower.setVisible(true);
 	}
 }
