@@ -9,8 +9,9 @@ import java.util.Date;
 
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
-    public CheckOut(String id, ArrayList<Book> checkoutCart) {
-        JFrame window = new JFrame();
+	private static JFrame window = new JFrame();
+    public CheckOut(String libraryCard, ArrayList<Book> checkoutCart) {
+    	final String id = libraryCard;
         window.setTitle("Checkout");
         BookPage test = null;
         BookPage test2 = null;
@@ -29,8 +30,8 @@ public class CheckOut {
         JButton rentals = new JButton("View my rentals");
         //JButton checkout = new JButton("Checkout");
         JButton confirm = new JButton("Confirm Checkout");
-        JButton search = new JButton("Search");
-        JTextField searchEntry = new JTextField();
+        //JButton search = new JButton("Search");
+        //JTextField searchEntry = new JTextField();
 
         JLabel idLabel = new JLabel("ID "+ id); // TODO: make adjustable
         idLabel.setBounds(10, 10, 100, 20);
@@ -43,7 +44,7 @@ public class CheckOut {
         window.add(rentals);
         rentals.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                displayLoginWindow();
+            	Rentals rent = new Rentals(id);
             }
         });
 
@@ -52,14 +53,20 @@ public class CheckOut {
         confirm.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayDueDateWindow();
+                //TODO: update database with new rentals
             }
         });
+        
+        mainPage.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                window.setVisible(false);
+            }
+        });
+        //searchEntry.setBounds(10, 50, 300, 20);
+        //window.add(searchEntry);
 
-        searchEntry.setBounds(10, 50, 300, 20);
-        window.add(searchEntry);
-
-        search.setBounds(350, 50, 100, 20);
-        window.add(search);
+        //search.setBounds(350, 50, 100, 20);
+        //window.add(search);
 
         //Once the search functionality is added, these panels will be used to display the entries that are returned from a search
         JPanel panel1 = new JPanel();

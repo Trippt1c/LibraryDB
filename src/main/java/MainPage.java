@@ -23,6 +23,8 @@ public class MainPage {
 		JButton next = new JButton("Next Page");
 		JButton previous = new JButton("Previous Page");
 		
+		window.setTitle("Book Search");
+		
 		queryDisplay.setBounds(10,70, 500, 20);
 		window.add(queryDisplay);
 		
@@ -49,7 +51,6 @@ public class MainPage {
 			public void actionPerformed(ActionEvent e) {
 				checkoutClicked = true;
 				displayLoginWindow();
-				//TODO create a new class to handle the user's checkout page
 			}
 		});
 		
@@ -186,7 +187,17 @@ public class MainPage {
 		popupLogin.setVisible(true);
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if (checkoutClicked) {
+				//TODO: replace if statement with method to check if the given card number returns a match in the database
+				if (cardNoEntry.getText().equals("12345")) {
+					JFrame popupWindow = new JFrame();
+					JLabel message = new JLabel("That card number does not match any accounts in the library.");
+					message.setBounds(20, 20, 350, 50);
+					popupWindow.add(message);
+					popupWindow.setSize(500, 200);
+					popupWindow.setLayout(null);
+					popupWindow.setVisible(true);
+				}
+				else if (checkoutClicked) {
 					CheckOut check = new CheckOut(cardNoEntry.getText(), checkoutCart);
 				} else {
 					Rentals rent = new Rentals(cardNoEntry.getText());
@@ -252,7 +263,7 @@ public class MainPage {
 				String borrowerssn = ssnField.getText();
 				String borrowerAddress = addressField.getText();
 				String borrowerPhone = phoneField.getText();
-				String libraryCard = "12345678";
+				String libraryCard = "12345678";//generate new id here
 				String responseMessage = "";
 				newBorrower.setVisible(false);
 				
@@ -277,7 +288,7 @@ public class MainPage {
 			}
 		});
 		
-		newBorrower.setSize(500, 700);
+		newBorrower.setSize(500, 500);
 		newBorrower.setLayout(null);
 		newBorrower.setVisible(true);
 	}
