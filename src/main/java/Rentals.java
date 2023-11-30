@@ -3,26 +3,27 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class Rentals {
-    public static void main(String args[]) {
+    public Rentals(String id) {
         JFrame window = new JFrame();
         window.setTitle("Rentals");
-        BookPage test = new BookPage();
-        BookPage test2 = new BookPage();
-        BookPage test3 = new BookPage();
+        BookPage test = new BookPage(new Book("Book1", "Author1", "isbn1", true));
+        BookPage test2 = new BookPage(new Book("Book2", "Author2", "isbn2", true));
+        BookPage test3 = new BookPage(new Book("Book3", "Author3", "isbn3", true));
         //JButton newUser = new JButton("Create Account");
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
         //JButton rentals = new JButton("View my rentals");
         JButton update = new JButton("Update");
         JButton checkout = new JButton("Checkout");
         //JButton confirm = new JButton("Confirm Checkout");
-        JButton search = new JButton("Search");
-        JTextField searchEntry = new JTextField();
+        //JButton search = new JButton("Search");
+        //JTextField searchEntry = new JTextField();
 
-        JLabel idLabel = new JLabel("ID 000000"); // TODO: make adjustable
+        JLabel idLabel = new JLabel("ID "+ id); // TODO: make adjustable
         idLabel.setBounds(10, 10, 100, 20);
         window.add(idLabel);
 
@@ -47,11 +48,11 @@ public class Rentals {
             }
         });
 
-        searchEntry.setBounds(10, 50, 300, 20);
-        window.add(searchEntry);
+        //searchEntry.setBounds(10, 50, 300, 20);
+        //window.add(searchEntry);
 
-        search.setBounds(350, 50, 100, 20);
-        window.add(search);
+        //search.setBounds(350, 50, 100, 20);
+        //window.add(search);
 
         // Calculate due date and date in
         Calendar currentDate = Calendar.getInstance();

@@ -3,17 +3,27 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
-    public static void main(String args[]) {
+    public CheckOut(String id, ArrayList<Book> checkoutCart) {
         JFrame window = new JFrame();
         window.setTitle("Checkout");
-        BookPage test = new BookPage();
-        BookPage test2 = new BookPage();
-        BookPage test3 = new BookPage();
+        BookPage test = null;
+        BookPage test2 = null;
+        BookPage test3 = null;
+        if (!checkoutCart.isEmpty()) {
+        	test = new BookPage(checkoutCart.remove(0));
+        }
+        if (!checkoutCart.isEmpty()) {
+        	test2 = new BookPage(checkoutCart.remove(0));
+        }
+        if (!checkoutCart.isEmpty()) {
+        	test3 = new BookPage(checkoutCart.remove(0));
+        }
         //JButton newUser = new JButton("Create Account");
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
         JButton rentals = new JButton("View my rentals");
@@ -22,7 +32,7 @@ public class CheckOut {
         JButton search = new JButton("Search");
         JTextField searchEntry = new JTextField();
 
-        JLabel idLabel = new JLabel("ID 000000"); // TODO: make adjustable
+        JLabel idLabel = new JLabel("ID "+ id); // TODO: make adjustable
         idLabel.setBounds(10, 10, 100, 20);
         window.add(idLabel);
 
@@ -70,9 +80,15 @@ public class CheckOut {
         panel3.setLayout(new BoxLayout(panel3, BoxLayout.Y_AXIS));
         panel3.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
-        test.display(panel1);
-        test2.display(panel2);
-        test3.display(panel3);
+        if (test != null) {
+        	test.display(panel1);
+        }
+        if (test2 != null) {
+        	test2.display(panel2);
+        }
+        if (test3 != null) {
+        	test3.display(panel3);
+        }
         window.setSize(1000, 1000);
         window.setLayout(null);
         window.setVisible(true);
@@ -95,8 +111,8 @@ public class CheckOut {
         popupLogin.setVisible(true);
     }
 
+    private static JFrame popupDueDate = new JFrame();
     public static void displayDueDateWindow() {
-        JFrame popupDueDate = new JFrame();
         JLabel message = new JLabel(getDueDateMessage());
         JButton close = new JButton("Close");
         message.setBounds(20, 10, 750, 30);
