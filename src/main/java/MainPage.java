@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 //From the main page, the user can search for books or open the checkout and rentals pages, or create a new borrower entry in the database.
 public class MainPage {
@@ -62,7 +64,11 @@ public class MainPage {
 			public void actionPerformed(ActionEvent e) {
 				String query = searchEntry.getText();
 				currentPageNo = 0;
-				getSearchResults(query);
+				try {
+					getSearchResults(query);
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
 				displaySearchResults();
 				int pageNoPlus1 = currentPageNo + 1;
 				int totalPlus1 = totalPageNo + 1;
@@ -124,11 +130,11 @@ public class MainPage {
 	}
 	
 	//Gets the search results from a query and stores them in the arraylist searchResults
-	public static void getSearchResults(String query) {
+	public static void getSearchResults(String query) throws SQLException {
 		searchResults.clear();
 	
 		//test data 
-		searchResults.add(new Book("Book1","Author1","isbn1", false));
+		/*searchResults.add(new Book("Book1","Author1","isbn1", false));
 		searchResults.add(new Book("Book2","Author2","isbn2", false));
 		searchResults.add(new Book("Book3","Author3","isbn3", false));
 		searchResults.add(new Book("Book4","Author4","isbn4", false));
@@ -163,9 +169,74 @@ public class MainPage {
 		searchResults.add(new Book("Book33","Author33","isbn33", false));
 		searchResults.add(new Book("Book34","Author34","isbn34", false));
 		searchResults.add(new Book("Book35","Author35","isbn35", false));
+		*/
 		
-		//TODO: create method to search the database for any titles/authors that match the query and add them to search results
-		//then remove test data
+		//New code to get data from database. Doesn't throw any exceptions, but still unsure if it works properly yet
+
+		QueryHandler handler = new QueryHandler();
+		
+		//Search by title
+		ResultSet matchingTitles = handler.query("SELECT * FROM BOOK WHERE Title LIKE '"+query+"'");
+		while (matchingTitles.next()) {
+			String title = matchingTitles.getString("Title");
+			String isbn = matchingTitles.getString("Isbn");
+			String authorString = "";
+			boolean checkedOut = false;
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			while (authorids.next()) {
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				while (authorNames.next()) {
+					authorString = authorString + authorNames.getString("Name");
+				}
+			}
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			checkedOut = bookLoaned.next();
+			searchResults.add(new Book(title, authorString, isbn, checkedOut));
+		}
+		
+		//Search by isbn
+		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		while (matchingIsbns.next()) {
+			String title = matchingIsbns.getString("Title");
+			String isbn = matchingIsbns.getString("Isbn");
+			String authorString = "";
+			boolean checkedOut = false;
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			while (authorids.next()) {
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				while (authorNames.next()) {
+					authorString = authorString + authorNames.getString("Name");
+				}
+			}
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			checkedOut = bookLoaned.next();
+			searchResults.add(new Book(title, authorString, isbn, checkedOut));
+		}
+			
+		//Search by author
+		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		while (matchingAuthors.next()) {
+			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '"+matchingAuthors.getString("Author_id")+"'");
+			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+matchingAuthorid.getString("Isbn")+"'");
+			while (booksByThisAuthor.next()) {
+				String title = matchingIsbns.getString("Title");
+				String isbn = matchingIsbns.getString("Isbn");
+				String authorString = "";
+				boolean checkedOut = false;
+				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+				while (authorids.next()) {
+					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+					while (authorNames.next()) {
+						authorString = authorString + authorNames.getString("Name");
+					}
+				}
+				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+				checkedOut = bookLoaned.next();
+				searchResults.add(new Book(title, authorString, isbn, checkedOut));
+			}
+		}
+		
+		handler.close();
 		
 		totalPageNo = searchResults.size()/10;
 	}
@@ -263,18 +334,44 @@ public class MainPage {
 				String borrowerssn = ssnField.getText();
 				String borrowerAddress = addressField.getText();
 				String borrowerPhone = phoneField.getText();
-				String libraryCard = "12345678";//generate new id here
+				String libraryCard = "";
 				String responseMessage = "";
 				newBorrower.setVisible(false);
+				boolean isUniquessn = true; 
+				int cardNoIterator = 0;
 				
+				//check if ssn is unique and generate new id. needs proper testing once database initialization is complete
+				try {
+					QueryHandler handler = new QueryHandler();
+					ResultSet matchingssn = handler.query("SELECT * FROM BORROWER WHERE Ssn LIKE '"+borrowerssn+"'");
+					ResultSet getids = handler.query("SELECT * FROM BORROWER");
+					isUniquessn = !matchingssn.next();
+					
+					ArrayList<Integer> forbiddenids = new ArrayList<Integer>();
+					while (getids.next()) {
+						forbiddenids.add(Integer.valueOf(getids.getString("Card_id")));
+					}
+					while (!forbiddenids.contains(cardNoIterator) && !forbiddenids.isEmpty()) {
+						cardNoIterator++;
+					}
+					libraryCard = (""+cardNoIterator);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				
-				//TODO create new entry in database using given data and newly generated library card if the ssn is unique
-				//and replace this if statement with code that checks if the ssn is unique
-				if (borrowerssn .equals("123456")) {
-					responseMessage = "Error: That SSN already exists within the database.";
+				//insert into database
+				if (isUniquessn) {
+					responseMessage = ("Account created. Your library card number is: "+libraryCard);
+					try {
+						QueryHandler handler = new QueryHandler();
+						handler.update("INSERT INTO BORROWERS (Card_id, ssn, Bname, Adress, Phone) Values ('"+libraryCard+"', '"+borrowerssn+"', '"+borrowerName+", '"+borrowerAddress+"', '"+borrowerPhone+"')");
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
 				}
 				else {
-					responseMessage = ("Account created. Your library card number is: "+libraryCard);
+					responseMessage = "Error: That SSN already exists within the database.";
 				}
 				
 				newBorrower.setVisible(false);
