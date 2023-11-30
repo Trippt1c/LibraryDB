@@ -17,17 +17,17 @@ public class StartDB
     public static void main(String[] args) throws SQLException, IOException
     {
         QueryHandler DB = new QueryHandler();
-        ArrayList<Book> books = parseBooks("books.csv");
+        ArrayList<TBook> books = parseBooks("books.csv");
         System.out.println(books.get(0));
         System.out.println(books.get(1));
         initDB(DB);
         addAuthors(DB,books);
     }
 
-    public static ArrayList<Book> parseBooks(String fileName) throws IOException
+    public static ArrayList<TBook> parseBooks(String fileName) throws IOException
     {
         BufferedReader in = new BufferedReader(new FileReader(fileName));
-        ArrayList<Book> books = new ArrayList<>();
+        ArrayList<TBook> books = new ArrayList<>();
         String line = in.readLine();
         while((line = in.readLine()) != null)
         {
@@ -35,15 +35,15 @@ public class StartDB
             String isbn = data[1];
             String title = data[2];
             String[] authors = data[3].split(",");
-            books.add(new Book(isbn,title,authors));
+            books.add(new TBook(isbn,title,authors));
         }
     	return books;
     }
 
-    public static void addAuthors(QueryHandler DB, ArrayList<Book> books) throws SQLException
+    public static void addAuthors(QueryHandler DB, ArrayList<TBook> books) throws SQLException
     {
         ArrayList<String> authors = new ArrayList<>();
-        for (Book book : books)
+        for (TBook book : books)
         {
             for (String author : book.authors)
             {
@@ -77,13 +77,13 @@ public class StartDB
         initDB(DB);
     }
 }
-class Book
+class TBook
 {
     String isbn;
     String title;
     String[] authors;
 
-    public Book(String isbn, String title, String[] authors)
+    public TBook(String isbn, String title, String[] authors)
     {
         this.isbn = isbn;
         this.title = title;
