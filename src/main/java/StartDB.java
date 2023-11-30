@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class StartDB
         ArrayList<TBook> books = parseBooks("books.csv");
         System.out.println(books.get(0));
         System.out.println(books.get(1));
-        initDB(DB);
+        wipeDB(DB);
         addAuthors(DB,books);
     }
 
@@ -43,13 +44,16 @@ public class StartDB
     public static void addAuthors(QueryHandler DB, ArrayList<TBook> books) throws SQLException
     {
         ArrayList<String> authors = new ArrayList<>();
+        String insertQuery = "INSERT INTO AUTHORS (Name) VALUES (?)";
+        PreparedStatement preparedStatement = DB.getConnection().prepareStatement(insertQuery);
         for (TBook book : books)
         {
             for (String author : book.authors)
             {
                 if(!authors.contains(author))
                 {
-                    DB.update("INSERT INTO AUTHORS (Name) VALUES ('"+author+"')");
+                    preparedStatement.setString(1,author);
+                    preparedStatement.executeUpdate();
                     authors.add(author);
                 }
             }
@@ -66,7 +70,7 @@ public class StartDB
     	DB.update("CREATE TABLE IF NOT EXISTS FINES (Loan_id INTEGER PRIMARY KEY, fine_amt REAL, Paid INTEGER)");
     }
 
-    public void wipeDB(QueryHandler DB) throws SQLException
+    public static void wipeDB(QueryHandler DB) throws SQLException
     {
     	DB.update("DROP TABLE IF EXISTS BOOK");
     	DB.update("DROP TABLE IF EXISTS BOOK_AUTHORS");
@@ -77,6 +81,7 @@ public class StartDB
         initDB(DB);
     }
 }
+
 class TBook
 {
     String isbn;
