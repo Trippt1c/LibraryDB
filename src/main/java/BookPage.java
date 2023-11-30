@@ -41,7 +41,7 @@ public class BookPage {
 		displayBox.add(status);
 		
 		//rent button will create a new window notifying user of success/failure
-		JButton rent = new JButton("Borrow this book");
+		/*JButton rent = new JButton("Borrow this book");
 		displayBox.add(rent);		
 		rent.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -65,7 +65,7 @@ public class BookPage {
 				popupWindow.setLayout(null);
 				popupWindow.setVisible(true);
 			}
-		});
+		});*/
 		
 		//This button could link to the info from BOOK_AUTHORS table
 		//JButton authorPage = new JButton("More from this author");

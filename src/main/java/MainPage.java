@@ -14,6 +14,7 @@ public class MainPage {
 	private static JLabel pageNo = new JLabel("Page 1 of 1");
 	private static JPanel[] displayPanels = new JPanel[10];
 	private static JLabel queryDisplay = new JLabel("");
+	private static boolean checkoutClicked;
 	public static void main(String args[]) {
 		JButton newUser = new JButton("Create Account");
 		JButton rentals = new JButton("View my rentals");
@@ -37,8 +38,8 @@ public class MainPage {
 		window.add(rentals);
 		rentals.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				checkoutClicked = false;
 				displayLoginWindow();
-				//TODO create a new class to handle the user's rental page
 			}
 		});
 		
@@ -46,6 +47,7 @@ public class MainPage {
 		window.add(checkout);
 		checkout.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				checkoutClicked = true;
 				displayLoginWindow();
 				//TODO create a new class to handle the user's checkout page
 			}
@@ -168,10 +170,10 @@ public class MainPage {
 	}
 	
 	//Function creates a new window to get the user's library card number
+	private static JTextField cardNoEntry = new JTextField();
+	private static JFrame popupLogin = new JFrame();
 	public static void displayLoginWindow() {
-		JFrame popupLogin = new JFrame();
 		JLabel message = new JLabel("Enter your library card number.");
-		JTextField cardNoEntry = new JTextField(30);
 		JButton login = new JButton("Login");
 		message.setBounds(20, 10, 350, 30);
 		cardNoEntry.setBounds(20, 40, 350, 30);
@@ -182,6 +184,16 @@ public class MainPage {
 		popupLogin.setSize(500, 200);
 		popupLogin.setLayout(null);
 		popupLogin.setVisible(true);
+		login.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (checkoutClicked) {
+					CheckOut check = new CheckOut(cardNoEntry.getText(), checkoutCart);
+				} else {
+					Rentals rent = new Rentals(cardNoEntry.getText());
+				}
+				popupLogin.setVisible(false);
+			}
+		});
 	}
 	
 	//Function displays the requested search results in the 10 panels in the middle of the page
