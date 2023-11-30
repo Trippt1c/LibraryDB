@@ -27,7 +27,7 @@ public class StartDB
     public static ArrayList<TBook> parseBooks(String fileName) throws IOException
     {
         BufferedReader in = new BufferedReader(new FileReader(fileName));
-        ArrayList<TBook> books = new ArrayList<>();
+        ArrayList<TBook> books = new ArrayList<TBook>();
         String line = in.readLine();
         while((line = in.readLine()) != null)
         {
@@ -42,7 +42,7 @@ public class StartDB
 
     public static void addAuthors(QueryHandler DB, ArrayList<TBook> books) throws SQLException
     {
-        ArrayList<String> authors = new ArrayList<>();
+        ArrayList<String> authors = new ArrayList<String>();
         for (TBook book : books)
         {
             for (String author : book.authors)
