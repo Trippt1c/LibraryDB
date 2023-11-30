@@ -365,7 +365,7 @@ public class MainPage {
 					responseMessage = ("Account created. Your library card number is: "+libraryCard);
 					try {
 						QueryHandler handler = new QueryHandler();
-						handler.update("INSERT INTO BORROWERS (Card_id, ssn, Bname, Adress, Phone) Values ('"+libraryCard+"', '"+borrowerssn+"', '"+borrowerName+", '"+borrowerAddress+"', '"+borrowerPhone+"')");
+						handler.update("INSERT INTO BORROWER (Card_id, ssn, Bname, Address, Phone) Values ('"+libraryCard+"', '"+borrowerssn+"', '"+borrowerName+"', '"+borrowerAddress+"', '"+borrowerPhone+"')");
 					} catch (SQLException e1) {
 						e1.printStackTrace();
 					}
