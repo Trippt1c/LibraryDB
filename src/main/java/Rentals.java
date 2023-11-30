@@ -8,8 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class Rentals {
+	private static JFrame window = new JFrame();
     public Rentals(String id) {
-        JFrame window = new JFrame();
         window.setTitle("Rentals");
         BookPage test = new BookPage(new Book("Book1", "Author1", "isbn1", true));
         BookPage test2 = new BookPage(new Book("Book2", "Author2", "isbn2", true));
@@ -18,7 +18,7 @@ public class Rentals {
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
         //JButton rentals = new JButton("View my rentals");
         JButton update = new JButton("Update");
-        JButton checkout = new JButton("Checkout");
+        JButton pay = new JButton("Pay Fines");
         //JButton confirm = new JButton("Confirm Checkout");
         //JButton search = new JButton("Search");
         //JTextField searchEntry = new JTextField();
@@ -40,12 +40,17 @@ public class Rentals {
         });
         */
 
-        checkout.setBounds(475, 10, 150, 20); // was checkout
-        window.add(checkout);
-        checkout.addActionListener(new ActionListener() {
+        pay.setBounds(475, 10, 150, 20); // was checkout
+        window.add(pay);
+        pay.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                displayLoginWindow();
+                //TODO: remove fines from database and update info on this page
             }
+        });
+        
+        mainPage.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                window.setVisible(false);            }
         });
 
         //searchEntry.setBounds(10, 50, 300, 20);
