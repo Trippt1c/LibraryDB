@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
@@ -18,17 +19,18 @@ public class QueryHandler
         connection = DriverManager.getConnection("jdbc:sqlite:Library.db");
     }
 
-    public boolean query(String query)
+    public ResultSet query(String query)
     {
         try
         {
-            connection.createStatement().executeQuery(query);
-            return true;
+            return connection.createStatement().executeQuery(query);
+            //return true;
         }
         catch(Exception e)
         {
             System.err.println(e.getMessage());
-            return false;
+            return null;
+            //return false;
         }
     }
 

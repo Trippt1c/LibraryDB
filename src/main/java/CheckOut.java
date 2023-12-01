@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,20 +12,28 @@ import java.util.Date;
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
 	private static JFrame window = new JFrame();
-    public CheckOut(String libraryCard, ArrayList<Book> checkoutCart) {
+	private static ArrayList<Book> checkoutCart = new ArrayList<Book>();
+    public CheckOut(String libraryCard, ArrayList<Book> cartToEmpty) {
     	final String id = libraryCard;
         window.setTitle("Checkout");
         BookPage test = null;
         BookPage test2 = null;
         BookPage test3 = null;
-        if (!checkoutCart.isEmpty()) {
-        	test = new BookPage(checkoutCart.remove(0));
+        
+        if (!cartToEmpty.isEmpty()) {
+        	Book temp = cartToEmpty.remove(0);
+        	test = new BookPage(temp);
+        	checkoutCart.add(temp);
         }
         if (!checkoutCart.isEmpty()) {
-        	test2 = new BookPage(checkoutCart.remove(0));
+        	Book temp = cartToEmpty.remove(0);
+        	test2 = new BookPage(temp);
+        	checkoutCart.add(temp);
         }
         if (!checkoutCart.isEmpty()) {
-        	test3 = new BookPage(checkoutCart.remove(0));
+        	Book temp = cartToEmpty.remove(0);
+        	test3 = new BookPage(temp);
+        	checkoutCart.add(temp);
         }
         //JButton newUser = new JButton("Create Account");
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
@@ -33,10 +43,36 @@ public class CheckOut {
         //JButton search = new JButton("Search");
         //JTextField searchEntry = new JTextField();
 
-        JLabel idLabel = new JLabel("ID "+ id); // TODO: make adjustable
+        JLabel idLabel = new JLabel("ID "+ id);
         idLabel.setBounds(10, 10, 100, 20);
         window.add(idLabel);
 
+        String name = "";
+        int numRented = 0;
+        
+		try {
+			//get user name
+			QueryHandler handler = new QueryHandler();
+			ResultSet user = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
+			while (user.next()) {
+				name = user.getString("Bname");
+			}
+			
+			//get number of books rented
+			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"'");
+			while (rentedBooks.next()) {
+				numRented++;
+			}
+			handler.close();
+		} 
+		catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+		
+        JLabel userName = new JLabel("Name: "+name);
+        userName.setBounds(10, 40, 100, 20);
+        window.add(userName);
+        
         mainPage.setBounds(120,10, 150, 20); // was newUser
         window.add(mainPage);
 
@@ -53,7 +89,33 @@ public class CheckOut {
         confirm.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayDueDateWindow();
-                //TODO: update database with new rentals
+				try {
+					QueryHandler handler = new QueryHandler();
+					Calendar calendar = Calendar.getInstance(); // current date + 14 days
+					SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
+					String checkoutDate = dateFormat.format(calendar.getTime());
+			        calendar.add(Calendar.DAY_OF_MONTH, 14);
+			        String dueDate = dateFormat.format(calendar.getTime());
+			        int loanNoIterator = 0;
+			        
+			        ArrayList<Integer> forbiddenids = new ArrayList<Integer>();
+			        ResultSet getids = handler.query("SELECT * FROM BOOK_LOANS");
+					while (getids.next()) {
+						forbiddenids.add(Integer.valueOf(getids.getString("Card_id")));
+					}
+					while (!forbiddenids.contains(loanNoIterator) && !forbiddenids.isEmpty()) {
+						loanNoIterator++;
+					}
+					String loanid = (""+loanNoIterator);
+			        
+					while (!checkoutCart.isEmpty()) {
+						Book checkedOut = checkoutCart.remove(0);
+						handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loanid+"', '"+checkedOut.getisbn()+"', '"+id+"', '"+checkoutDate+"', '"+dueDate+"', "+"STILL OUT"+"')");
+						handler.close();
+					}
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
             }
         });
         
@@ -102,7 +164,7 @@ public class CheckOut {
     }
 
     //Function creates a new window to get the user's library card number
-    public static void displayLoginWindow() {
+/*    public static void displayLoginWindow() {
         JFrame popupLogin = new JFrame();
         JLabel message = new JLabel("Enter your library card number.");
         JTextField cardNoEntry = new JTextField(30);
@@ -116,7 +178,7 @@ public class CheckOut {
         popupLogin.setSize(500, 200);
         popupLogin.setLayout(null);
         popupLogin.setVisible(true);
-    }
+    }*/
 
     private static JFrame popupDueDate = new JFrame();
     public static void displayDueDateWindow() {
