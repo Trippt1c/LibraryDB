@@ -258,8 +258,19 @@ public class MainPage {
 		popupLogin.setVisible(true);
 		login.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//TODO: replace if statement with method to check if the given card number returns a match in the database
-				if (cardNoEntry.getText().equals("12345")) {
+				String id = cardNoEntry.getText();
+				boolean foundMatch = false;
+				try {
+					QueryHandler handler = new QueryHandler();
+					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
+					//foundMatch = getid.next();
+					foundMatch = true;
+					
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				if (!foundMatch) {
 					JFrame popupWindow = new JFrame();
 					JLabel message = new JLabel("That card number does not match any accounts in the library.");
 					message.setBounds(20, 20, 350, 50);

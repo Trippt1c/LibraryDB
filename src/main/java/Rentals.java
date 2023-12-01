@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,6 +26,24 @@ public class Rentals {
         //JTextField searchEntry = new JTextField();
 
         JLabel idLabel = new JLabel("ID "+ id); // TODO: make adjustable
+        String name = "";
+        
+		try {
+			QueryHandler handler = new QueryHandler();
+			ResultSet user = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
+			while (user.next()) {
+				name = user.getString("Bname");
+			}
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+        JLabel userName = new JLabel("Name: "+name);
+        userName.setBounds(10, 40, 100, 20);
+        window.add(userName);
+        
         idLabel.setBounds(10, 10, 100, 20);
         window.add(idLabel);
 
