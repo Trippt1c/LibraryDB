@@ -48,7 +48,7 @@ public class CheckOut {
         window.add(idLabel);
 
         String name = "";
-        int numRented = 4;
+        int numRented = 0;
         
 		try {
 			//get user name
