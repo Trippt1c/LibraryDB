@@ -74,7 +74,7 @@ public class StartDB
             preparedStatement.setString(1,book.isbn);
             preparedStatement.setString(2,book.title);
             preparedStatement.executeUpdate();
-            System.out.println("Added book: " + book.toString());
+            System.out.println("Added book: " + book);
         }
     }
 
@@ -110,7 +110,7 @@ public class StartDB
             preparedStatement.setString(3,borrower.address);
             preparedStatement.setString(4,borrower.phone);
             preparedStatement.executeUpdate();
-            System.out.println("Added borrower: " + borrower.toString());
+            System.out.println("Added borrower: " + borrower);
         }
     }
 
@@ -131,7 +131,7 @@ public class StartDB
     	return borrowers;
     }
 
-    public static void initDB(QueryHandler DB) throws SQLException
+    public static void initDB(QueryHandler DB)
     {
     	DB.update("CREATE TABLE IF NOT EXISTS BOOK (Isbn TEXT PRIMARY KEY, Title TEXT)");
         DB.update("CREATE TABLE IF NOT EXISTS BOOK_AUTHORS (Author_id INTEGER, Isbn TEXT, PRIMARY KEY(Author_id, Isbn))");
@@ -141,7 +141,7 @@ public class StartDB
     	DB.update("CREATE TABLE IF NOT EXISTS FINES (Loan_id INTEGER PRIMARY KEY, fine_amt REAL, Paid INTEGER)");
     }
 
-    public static void wipeDB(QueryHandler DB) throws SQLException
+    public static void wipeDB(QueryHandler DB)
     {
     	DB.update("DROP TABLE IF EXISTS BOOK");
     	DB.update("DROP TABLE IF EXISTS BOOK_AUTHORS");
