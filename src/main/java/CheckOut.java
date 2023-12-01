@@ -111,8 +111,8 @@ public class CheckOut {
 					while (!checkoutCart.isEmpty()) {
 						Book checkedOut = checkoutCart.remove(0);
 						handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loanid+"', '"+checkedOut.getisbn()+"', '"+id+"', '"+checkoutDate+"', '"+dueDate+"', "+"STILL OUT"+"')");
-						handler.close();
 					}
+					handler.close();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}

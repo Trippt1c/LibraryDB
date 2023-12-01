@@ -263,8 +263,9 @@ public class MainPage {
 				try {
 					QueryHandler handler = new QueryHandler();
 					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
-					//foundMatch = getid.next();
-					foundMatch = true;
+					foundMatch = getid.next();
+					//foundMatch = true;
+					handler.close();
 					
 				} catch (SQLException e1) {
 					e1.printStackTrace();
@@ -348,7 +349,7 @@ public class MainPage {
 				String responseMessage = "";
 				newBorrower.setVisible(false);
 				boolean isUniquessn = true; 
-				int cardNoIterator = 0;
+				int cardNoIterator = 1;
 				
 				//check if ssn is unique and generate new id. needs proper testing once database initialization is complete
 				try {
@@ -361,10 +362,11 @@ public class MainPage {
 					while (getids.next()) {
 						forbiddenids.add(Integer.valueOf(getids.getString("Card_id")));
 					}
-					while (!forbiddenids.contains(cardNoIterator) && !forbiddenids.isEmpty()) {
+					while (forbiddenids.contains(cardNoIterator) && !forbiddenids.isEmpty()) {
 						cardNoIterator++;
 					}
 					libraryCard = (""+cardNoIterator);
+					handler.close();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -375,6 +377,7 @@ public class MainPage {
 					try {
 						QueryHandler handler = new QueryHandler();
 						handler.update("INSERT INTO BORROWER (Card_id, ssn, Bname, Address, Phone) Values ('"+libraryCard+"', '"+borrowerssn+"', '"+borrowerName+"', '"+borrowerAddress+"', '"+borrowerPhone+"')");
+						handler.close();
 					} catch (SQLException e1) {
 						e1.printStackTrace();
 					}
