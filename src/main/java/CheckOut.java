@@ -73,6 +73,10 @@ public class CheckOut {
         userName.setBounds(10, 40, 100, 20);
         window.add(userName);
         
+        JLabel numRentalsLabel = new JLabel("Books rented by this account: "+numRented);
+        numRentalsLabel.setBounds(10, 70, 200, 20);
+        window.add(numRentalsLabel);
+        
         mainPage.setBounds(120,10, 150, 20); // was newUser
         window.add(mainPage);
 
@@ -84,8 +88,23 @@ public class CheckOut {
             }
         });
 
+
+        JLabel tooManyBooks = new JLabel("You can only rent 3 books at a time.");
+        JLabel tooManyBooks2 = new JLabel("Please return your rented books before cheking out more.");
+        tooManyBooks.setBounds(475, 10, 350, 20);
+        tooManyBooks2.setBounds(475, 20, 350, 20); 
+        
         confirm.setBounds(475, 10, 150, 20); // was checkout
-        window.add(confirm);
+        
+        //Replace checkout button with error message if the user has more than 3 books
+        if (numRented+checkoutCart.size() > 3) {
+        	window.add(tooManyBooks);
+        	window.add(tooManyBooks2);
+        }
+        else {
+        	window.add(confirm);
+        }
+        
         confirm.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 displayDueDateWindow();
