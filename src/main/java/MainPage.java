@@ -267,7 +267,6 @@ public class MainPage {
 					foundMatch = true;
 					
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				if (!foundMatch) {
@@ -367,7 +366,6 @@ public class MainPage {
 					}
 					libraryCard = (""+cardNoIterator);
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 				
