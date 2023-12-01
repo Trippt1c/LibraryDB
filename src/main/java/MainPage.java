@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -24,6 +25,24 @@ public class MainPage {
 		JButton search = new JButton("Search");
 		JButton next = new JButton("Next Page");
 		JButton previous = new JButton("Previous Page");
+		
+		JButton restartDatabase = new JButton("Restart Database");
+		restartDatabase.setBounds(600, 10, 150, 20);
+		window.add(restartDatabase);
+		restartDatabase.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				StartDB restart = new StartDB();
+				try {
+					restart.restart();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		
 		window.setTitle("Book Search");
 		
