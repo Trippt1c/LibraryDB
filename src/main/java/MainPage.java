@@ -8,32 +8,45 @@ import java.sql.SQLException;
 import java.util.*;
 //From the main page, the user can search for books or open the checkout and rentals pages, or create a new borrower entry in the database.
 public class MainPage {
-	private static JFrame window = new JFrame();
-	private static JTextField searchEntry = new JTextField();
-	private static ArrayList<Book> searchResults = new ArrayList<Book>();
-	private static ArrayList<Book> checkoutCart = new ArrayList<Book>();
-	private static int currentPageNo = 0;
-	private static int totalPageNo = 0;
-	private static JLabel pageNo = new JLabel("Page 1 of 1");
-	private static JPanel[] displayPanels = new JPanel[10];
-	private static JLabel queryDisplay = new JLabel("");
+	private static JFrame window;
+	private static JTextField searchEntry;
+	private static ArrayList<Book> searchResults;
+	private static ArrayList<Book> checkoutCart;
+	private static int currentPageNo;
+	private static int totalPageNo;
+	private static JLabel pageNo;
+	private static JPanel[] displayPanels;
+	private static JLabel queryDisplay;
 	private static boolean checkoutClicked;
 	public static void main(String args[]) {
+		window = new JFrame();
+		searchEntry = new JTextField();
+		searchResults = new ArrayList<Book>();
+		checkoutCart = new ArrayList<Book>();
+		currentPageNo = 0;
+		totalPageNo = 0;
+		displayPanels = new JPanel[10];
+		queryDisplay = new JLabel("");
+		pageNo = new JLabel("Page 1 of 1");
 		JButton newUser = new JButton("Create Account");
 		JButton rentals = new JButton("View my rentals");
 		JButton checkout = new JButton("Checkout");
 		JButton search = new JButton("Search");
 		JButton next = new JButton("Next Page");
 		JButton previous = new JButton("Previous Page");
+		JLabel warning = new JLabel("Note: This process will take several minutes");
 		
 		JButton restartDatabase = new JButton("Restart Database");
 		restartDatabase.setBounds(600, 10, 150, 20);
 		window.add(restartDatabase);
+		
+		warning.setBounds(600, 30, 300, 20);
+		window.add(warning);
 		restartDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				StartDB restart = new StartDB();
 				try {
-					restart.restart();
+					restart.start();//Takes roughly 15 minutes
 				} catch (SQLException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -144,6 +157,7 @@ public class MainPage {
 		
 		
 		window.setSize(1000, 1000);
+		window.repaint();
 		window.setLayout(null);
 		window.setVisible(true);
 	}
@@ -187,8 +201,8 @@ public class MainPage {
 		searchResults.add(new Book("Book32","Author32","isbn32", false));
 		searchResults.add(new Book("Book33","Author33","isbn33", false));
 		searchResults.add(new Book("Book34","Author34","isbn34", false));
-		searchResults.add(new Book("Book35","Author35","isbn35", false));
-		*/
+		searchResults.add(new Book("Book35","Author35","isbn35", false));*/
+		
 		
 		//New code to get data from database. Doesn't throw any exceptions, but still unsure if it works properly yet
 
@@ -203,9 +217,9 @@ public class MainPage {
 			boolean checkedOut = false;
 			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
 				while (authorNames.next()) {
-					authorString = authorString + authorNames.getString("Name");
+					authorString = authorNames.getString("Name");
 				}
 			}
 			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
@@ -222,7 +236,7 @@ public class MainPage {
 			boolean checkedOut = false;
 			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
 				while (authorNames.next()) {
 					authorString = authorString + authorNames.getString("Name");
 				}
@@ -233,9 +247,9 @@ public class MainPage {
 		}
 			
 		//Search by author
-		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		ResultSet matchingAuthors = handler.query("SELECT * FROM AUTHORS WHERE Name LIKE '"+query+"'");
 		while (matchingAuthors.next()) {
-			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '"+matchingAuthors.getString("Author_id")+"'");
+			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '"+matchingAuthors.getInt("Author_id")+"'");
 			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+matchingAuthorid.getString("Isbn")+"'");
 			while (booksByThisAuthor.next()) {
 				String title = matchingIsbns.getString("Title");
@@ -244,7 +258,7 @@ public class MainPage {
 				boolean checkedOut = false;
 				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
 				while (authorids.next()) {
-					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
 					while (authorNames.next()) {
 						authorString = authorString + authorNames.getString("Name");
 					}
@@ -261,9 +275,12 @@ public class MainPage {
 	}
 	
 	//Function creates a new window to get the user's library card number
-	private static JTextField cardNoEntry = new JTextField();
-	private static JFrame popupLogin = new JFrame();
+	private static JTextField cardNoEntry;
+	private static JFrame popupLogin;
 	public static void displayLoginWindow() {
+		cardNoEntry = new JTextField();
+		popupLogin = new JFrame();
+		
 		JLabel message = new JLabel("Enter your library card number.");
 		JButton login = new JButton("Login");
 		message.setBounds(20, 10, 350, 30);
@@ -327,12 +344,17 @@ public class MainPage {
 	}
 	
 	
-	private static JFrame newBorrower = new JFrame();
-	private static JTextField nameField = new JTextField();
-	private static JTextField ssnField = new JTextField();
-	private static JTextField addressField = new JTextField();
-	private static JTextField phoneField = new JTextField();
+	private static JFrame newBorrower;
+	private static JTextField nameField;
+	private static JTextField ssnField;
+	private static JTextField addressField;
+	private static JTextField phoneField;
 	public static void createBorrower() {
+		newBorrower = new JFrame();
+		nameField = new JTextField();
+		ssnField = new JTextField();
+		addressField = new JTextField();
+		phoneField = new JTextField();
 		
 		JLabel nameLabel = new JLabel("Name:");
 		nameLabel.setBounds(10, 20, 100, 20);
@@ -417,6 +439,7 @@ public class MainPage {
 		});
 		
 		newBorrower.setSize(500, 500);
+		newBorrower.repaint();
 		newBorrower.setLayout(null);
 		newBorrower.setVisible(true);
 	}
@@ -450,16 +473,28 @@ public class MainPage {
 			public void actionPerformed(ActionEvent e) {
 				JFrame popupWindow = new JFrame();
 				String messageText = "";
-				if(searchResults.get(index).getStatus()) {
-					messageText = ("This book is unavailable");
+				boolean isInCart = false;
+				for (int i = 0 ; i < checkoutCart.size(); i++) {
+					if (searchResults.get(index).getisbn().equals(checkoutCart.get(i).getisbn())) {
+						isInCart = true;
+					}
+				}
+				if (isInCart) {
+					messageText = ("This book is already in your cart.");
+				}
+				else if(searchResults.get(index).getStatus()) {
+					messageText = ("This book is unavailable.");
 				}
 				else if (checkoutCart.size() >= 3) {
-					messageText = ("You cannot rent more than 3 books");
+					messageText = ("You cannot rent more than 3 books.");
 				}
 				else {
-					messageText = (searchResults.get(index).getTitle()+" added to cart. Checkout with your library card");
+					messageText = (searchResults.get(index).getTitle()+" added to cart.");
 					searchResults.get(index).checkout();
 					checkoutCart.add(searchResults.get(index));
+					JLabel message2 = new JLabel("Checkout with your library card id.");
+					message2.setBounds(20, 40, 350, 50);
+					popupWindow.add(message2);
 				}
 				JLabel message = new JLabel(messageText);
 				message.setBounds(20, 20, 350, 50);
