@@ -13,7 +13,7 @@ import java.util.Date;
 public class CheckOut {
 	private static JFrame window = new JFrame();
 	private static ArrayList<Book> checkoutCart;
-    public CheckOut(String libraryCard, ArrayList<Book> cartToEmpty) {
+    public CheckOut(String libraryCard, ArrayList<Book> cartToEmpty, Calendar currentDate) {
     	window = new JFrame();
     	checkoutCart = new ArrayList<Book>();
     	final String id = libraryCard;
@@ -86,7 +86,7 @@ public class CheckOut {
         window.add(rentals);
         rentals.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            	Rentals rent = new Rentals(id);
+            	Rentals rent = new Rentals(id, currentDate);
             }
         });
 
@@ -112,14 +112,14 @@ public class CheckOut {
         
         confirm.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                displayDueDateWindow();
+                displayDueDateWindow(currentDate);
 				try {
 					QueryHandler handler = new QueryHandler();
-					Calendar calendar = Calendar.getInstance(); // current date + 14 days
 					SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
-					String checkoutDate = dateFormat.format(calendar.getTime());
-			        calendar.add(Calendar.DAY_OF_MONTH, 14);
-			        String dueDate = dateFormat.format(calendar.getTime());
+					String checkoutDate = dateFormat.format(currentDate.getTime());
+					Calendar newDate = (Calendar) currentDate.clone();
+			        newDate.add(Calendar.DAY_OF_MONTH, 14);
+			        String dueDate = dateFormat.format(newDate.getTime());
 			        int loanNoIterator = 0;
 			        
 			        ArrayList<Integer> forbiddenids = new ArrayList<Integer>();
@@ -207,9 +207,9 @@ public class CheckOut {
     }*/
 
     private static JFrame popupDueDate;
-    public static void displayDueDateWindow() {
+    public static void displayDueDateWindow(Calendar today) {
     	popupDueDate = new JFrame();
-        JLabel message = new JLabel(getDueDateMessage());
+        JLabel message = new JLabel(getDueDateMessage(today));
         JButton close = new JButton("Close");
         message.setBounds(20, 10, 750, 30);
         close.setBounds(20, 50, 100, 30);
@@ -227,12 +227,14 @@ public class CheckOut {
         window.setVisible(false);
     }
 
-    private static String getDueDateMessage() {
+    private static String getDueDateMessage(Calendar today) {
         Calendar calendar = Calendar.getInstance(); // current date + 14 days
         calendar.add(Calendar.DAY_OF_MONTH, 14);
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy");
-        String dueDate = dateFormat.format(calendar.getTime());
+        Calendar newDate = (Calendar) today.clone();
+        newDate.add(Calendar.DAY_OF_MONTH, 14);
+        String dueDate = dateFormat.format(newDate.getTime());
 
         return "Book(s) checked out. Please return by " + dueDate;
     }

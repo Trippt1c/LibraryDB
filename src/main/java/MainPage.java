@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 //From the main page, the user can search for books or open the checkout and rentals pages, or create a new borrower entry in the database.
 public class MainPage {
@@ -18,6 +19,7 @@ public class MainPage {
 	private static JPanel[] displayPanels;
 	private static JLabel queryDisplay;
 	private static boolean checkoutClicked;
+	private static Calendar currentDate;
 	public static void main(String args[]) {
 		window = new JFrame();
 		searchEntry = new JTextField();
@@ -35,6 +37,35 @@ public class MainPage {
 		JButton next = new JButton("Next Page");
 		JButton previous = new JButton("Previous Page");
 		JLabel warning = new JLabel("Note: This process will take several minutes");
+		JButton incrementDate = new JButton("+");
+		JButton decrementDate = new JButton("-");
+		currentDate = Calendar.getInstance();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+		JLabel displayDate = new JLabel(dateFormat.format(currentDate.getTime()));
+		JLabel changeDate = new JLabel("Set current day:");
+		
+		displayDate.setBounds(830, 70, 150, 20);
+		window.add(displayDate);
+		changeDate.setBounds(600, 70, 150, 20);
+		window.add(changeDate);
+		incrementDate.setBounds(700, 70, 50, 20);
+		window.add(incrementDate);
+		decrementDate.setBounds(750, 70, 50, 20);
+		window.add(decrementDate);
+		
+		incrementDate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				currentDate.add(Calendar.DATE, 1);
+				displayDate.setText(dateFormat.format(currentDate.getTime()));
+			}
+		});
+		
+		decrementDate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				currentDate.add(Calendar.DATE, -1);
+				displayDate.setText(dateFormat.format(currentDate.getTime()));
+			}
+		});
 		
 		JButton restartDatabase = new JButton("Restart Database");
 		restartDatabase.setBounds(600, 10, 150, 20);
@@ -217,9 +248,9 @@ public class MainPage {
 			boolean checkedOut = false;
 			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
 				while (authorNames.next()) {
-					authorString = authorNames.getString("Name");
+					authorString = authorString+" "+authorids.getString("");
 				}
 			}
 			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
@@ -236,9 +267,9 @@ public class MainPage {
 			boolean checkedOut = false;
 			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
 				while (authorNames.next()) {
-					authorString = authorString + authorNames.getString("Name");
+					authorString = authorString+" "+authorNames.getString("Name");
 				}
 			}
 			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
@@ -260,7 +291,7 @@ public class MainPage {
 				while (authorids.next()) {
 					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getInt("Author_id")+"'");
 					while (authorNames.next()) {
-						authorString = authorString + authorNames.getString("Name");
+						authorString = authorString+" "+authorNames.getString("Name");
 					}
 				}
 				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
@@ -316,9 +347,9 @@ public class MainPage {
 					popupWindow.setVisible(true);
 				}
 				else if (checkoutClicked) {
-					CheckOut check = new CheckOut(cardNoEntry.getText(), checkoutCart);
+					CheckOut check = new CheckOut(cardNoEntry.getText(), checkoutCart, currentDate);
 				} else {
-					Rentals rent = new Rentals(cardNoEntry.getText());
+					Rentals rent = new Rentals(cardNoEntry.getText(), currentDate);
 				}
 				popupLogin.setVisible(false);
 			}
