@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 public class StartDB
 {
-    public static void main(String[] args) throws SQLException, IOException
+    public static void start() throws SQLException, IOException
     {
         QueryHandler DB = new QueryHandler();
         ArrayList<TBook> books = parseBooks("books.csv");
@@ -82,7 +82,7 @@ public class StartDB
     public static void addBookAuthors(QueryHandler DB, ArrayList<TBook> books) throws SQLException
     {
         String insertQuery = "INSERT INTO BOOK_AUTHORS (Isbn, Author_id) VALUES (?,?)";
-        ArrayList<String> pairs = new ArrayList<>();
+        ArrayList<String> pairs = new ArrayList<String>();
         PreparedStatement preparedStatement = DB.getConnection().prepareStatement(insertQuery);
         for (TBook book : books)
         {
@@ -118,7 +118,7 @@ public class StartDB
     public static ArrayList<TBorrower> parseBorrowers(String fileName) throws IOException
     {
     	BufferedReader in = new BufferedReader(new FileReader(fileName));
-    	ArrayList<TBorrower> borrowers = new ArrayList<>();
+    	ArrayList<TBorrower> borrowers = new ArrayList<TBorrower>();
     	String line = in.readLine();
     	while((line = in.readLine()) != null)
     	{

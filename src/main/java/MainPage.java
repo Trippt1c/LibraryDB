@@ -2,28 +2,60 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 //From the main page, the user can search for books or open the checkout and rentals pages, or create a new borrower entry in the database.
 public class MainPage {
-	private static JFrame window = new JFrame();
-	private static JTextField searchEntry = new JTextField();
-	private static ArrayList<Book> searchResults = new ArrayList<Book>();
-	private static ArrayList<Book> checkoutCart = new ArrayList<Book>();
-	private static int currentPageNo = 0;
-	private static int totalPageNo = 0;
-	private static JLabel pageNo = new JLabel("Page 1 of 1");
-	private static JPanel[] displayPanels = new JPanel[10];
-	private static JLabel queryDisplay = new JLabel("");
+	private static JFrame window;
+	private static JTextField searchEntry;
+	private static ArrayList<Book> searchResults;
+	private static ArrayList<Book> checkoutCart;
+	private static int currentPageNo;
+	private static int totalPageNo;
+	private static JLabel pageNo;
+	private static JPanel[] displayPanels;
+	private static JLabel queryDisplay;
 	private static boolean checkoutClicked;
 	public static void main(String args[]) {
+		window = new JFrame();
+		searchEntry = new JTextField();
+		searchResults = new ArrayList<Book>();
+		checkoutCart = new ArrayList<Book>();
+		currentPageNo = 0;
+		totalPageNo = 0;
+		displayPanels = new JPanel[10];
+		queryDisplay = new JLabel("");
+		pageNo = new JLabel("Page 1 of 1");
 		JButton newUser = new JButton("Create Account");
 		JButton rentals = new JButton("View my rentals");
 		JButton checkout = new JButton("Checkout");
 		JButton search = new JButton("Search");
 		JButton next = new JButton("Next Page");
 		JButton previous = new JButton("Previous Page");
+		JLabel warning = new JLabel("Note: This process will take several minutes");
+
+		JButton restartDatabase = new JButton("Restart Database");
+		restartDatabase.setBounds(600, 10, 150, 20);
+		window.add(restartDatabase);
+
+		warning.setBounds(600, 30, 300, 20);
+		window.add(warning);
+		restartDatabase.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				StartDB restart = new StartDB();
+				try {
+					restart.start();//Takes roughly 15 minutes
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
 		
 		window.setTitle("Book Search");
 		
@@ -125,6 +157,7 @@ public class MainPage {
 		
 		
 		window.setSize(1000, 1000);
+		window.repaint();
 		window.setLayout(null);
 		window.setVisible(true);
 	}
@@ -132,105 +165,65 @@ public class MainPage {
 	//Gets the search results from a query and stores them in the arraylist searchResults
 	public static void getSearchResults(String query) throws SQLException {
 		searchResults.clear();
-	
-		//test data 
-		/*searchResults.add(new Book("Book1","Author1","isbn1", false));
-		searchResults.add(new Book("Book2","Author2","isbn2", false));
-		searchResults.add(new Book("Book3","Author3","isbn3", false));
-		searchResults.add(new Book("Book4","Author4","isbn4", false));
-		searchResults.add(new Book("Book5","Author5","isbn5", false));
-		searchResults.add(new Book("Book6","Author6","isbn6", false));
-		searchResults.add(new Book("Book7","Author7","isbn7", false));
-		searchResults.add(new Book("Book8","Author8","isbn8", false));
-		searchResults.add(new Book("Book9","Author9","isbn9", false));
-		searchResults.add(new Book("Book10","Author10","isbn10", false));
-		searchResults.add(new Book("Book11","Author11","isbn11", false));
-		searchResults.add(new Book("Book12","Author12","isbn12", false));
-		searchResults.add(new Book("Book13","Author13","isbn13", false));
-		searchResults.add(new Book("Book14 very long title with many words","Author14 very long author name with many words","isbn14", true));
-		searchResults.add(new Book("Book15","Author15","isbn15", false));
-		searchResults.add(new Book("Book16","Author16","isbn16", false));
-		searchResults.add(new Book("Book17","Author17","isbn17", false));
-		searchResults.add(new Book("Book18","Author18","isbn18", false));
-		searchResults.add(new Book("Book19","Author19","isbn19", false));
-		searchResults.add(new Book("Book20","Author20","isbn20", false));
-		searchResults.add(new Book("Book21","Author21","isbn21", false));
-		searchResults.add(new Book("Book22","Author22","isbn22", false));
-		searchResults.add(new Book("Book23","Author23","isbn23", false));
-		searchResults.add(new Book("Book24","Author24","isbn24", false));
-		searchResults.add(new Book("Book25","Author25","isbn25", false));
-		searchResults.add(new Book("Book26","Author26","isbn26", false));
-		searchResults.add(new Book("Book27","Author27","isbn27", false));
-		searchResults.add(new Book("Book28","Author28","isbn28", false));
-		searchResults.add(new Book("Book29","Author29","isbn29", false));
-		searchResults.add(new Book("Book30","Author30","isbn30", false));
-		searchResults.add(new Book("Book31","Author31","isbn31", false));
-		searchResults.add(new Book("Book32","Author32","isbn32", false));
-		searchResults.add(new Book("Book33","Author33","isbn33", false));
-		searchResults.add(new Book("Book34","Author34","isbn34", false));
-		searchResults.add(new Book("Book35","Author35","isbn35", false));
-		*/
-		
-		//New code to get data from database. Doesn't throw any exceptions, but still unsure if it works properly yet
 
 		QueryHandler handler = new QueryHandler();
 		
 		//Search by title
-		ResultSet matchingTitles = handler.query("SELECT * FROM BOOK WHERE Title LIKE '"+query+"'");
+		ResultSet matchingTitles = handler.query("SELECT * FROM BOOK WHERE Title LIKE '%"+query+"%'");
 		while (matchingTitles.next()) {
 			String title = matchingTitles.getString("Title");
 			String isbn = matchingTitles.getString("Isbn");
 			String authorString = "";
 			boolean checkedOut = false;
-			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '%"+authorids.getString("Author_id")+"%'");
 				while (authorNames.next()) {
-					authorString = authorString + authorNames.getString("Name");
+					authorString = authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
 		
 		//Search by isbn
-		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+query+"%'");
 		while (matchingIsbns.next()) {
 			String title = matchingIsbns.getString("Title");
 			String isbn = matchingIsbns.getString("Isbn");
 			String authorString = "";
 			boolean checkedOut = false;
-			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '%"+authorids.getString("Author_id")+"%'");
 				while (authorNames.next()) {
 					authorString = authorString + authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
 			
 		//Search by author
-		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+query+"%'");
 		while (matchingAuthors.next()) {
-			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '"+matchingAuthors.getString("Author_id")+"'");
-			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+matchingAuthorid.getString("Isbn")+"'");
+			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '%"+matchingAuthors.getString("Author_id")+"%'");
+			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+matchingAuthorid.getString("Isbn")+"%'");
 			while (booksByThisAuthor.next()) {
 				String title = matchingIsbns.getString("Title");
 				String isbn = matchingIsbns.getString("Isbn");
 				String authorString = "";
 				boolean checkedOut = false;
-				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 				while (authorids.next()) {
-					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '%"+authorids.getString("Author_id")+"%'");
 					while (authorNames.next()) {
 						authorString = authorString + authorNames.getString("Name");
 					}
 				}
-				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 				checkedOut = bookLoaned.next();
 				searchResults.add(new Book(title, authorString, isbn, checkedOut));
 			}
@@ -242,9 +235,12 @@ public class MainPage {
 	}
 	
 	//Function creates a new window to get the user's library card number
-	private static JTextField cardNoEntry = new JTextField();
-	private static JFrame popupLogin = new JFrame();
+	private static JTextField cardNoEntry;
+	private static JFrame popupLogin;
 	public static void displayLoginWindow() {
+		cardNoEntry = new JTextField();
+		popupLogin = new JFrame();
+
 		JLabel message = new JLabel("Enter your library card number.");
 		JButton login = new JButton("Login");
 		message.setBounds(20, 10, 350, 30);
@@ -262,9 +258,10 @@ public class MainPage {
 				boolean foundMatch = false;
 				try {
 					QueryHandler handler = new QueryHandler();
-					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
-					//foundMatch = getid.next();
-					foundMatch = true;
+					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '%"+id+"%'");
+					foundMatch = getid.next();
+					//foundMatch = true;
+					handler.close();
 					
 				} catch (SQLException e1) {
 					e1.printStackTrace();
@@ -307,13 +304,18 @@ public class MainPage {
 	}
 	
 	
-	private static JFrame newBorrower = new JFrame();
-	private static JTextField nameField = new JTextField();
-	private static JTextField ssnField = new JTextField();
-	private static JTextField addressField = new JTextField();
-	private static JTextField phoneField = new JTextField();
+	private static JFrame newBorrower;
+	private static JTextField nameField;
+	private static JTextField ssnField;
+	private static JTextField addressField;
+	private static JTextField phoneField;
 	public static void createBorrower() {
-		
+		newBorrower = new JFrame();
+		nameField = new JTextField();
+		ssnField = new JTextField();
+		addressField = new JTextField();
+		phoneField = new JTextField();
+
 		JLabel nameLabel = new JLabel("Name:");
 		nameLabel.setBounds(10, 20, 100, 20);
 		newBorrower.add(nameLabel);
@@ -348,7 +350,7 @@ public class MainPage {
 				String responseMessage = "";
 				newBorrower.setVisible(false);
 				boolean isUniquessn = true; 
-				int cardNoIterator = 0;
+				int cardNoIterator = 1;
 				
 				//check if ssn is unique and generate new id. needs proper testing once database initialization is complete
 				try {
@@ -361,10 +363,11 @@ public class MainPage {
 					while (getids.next()) {
 						forbiddenids.add(Integer.valueOf(getids.getString("Card_id")));
 					}
-					while (!forbiddenids.contains(cardNoIterator) && !forbiddenids.isEmpty()) {
+					while (forbiddenids.contains(cardNoIterator) && !forbiddenids.isEmpty()) {
 						cardNoIterator++;
 					}
 					libraryCard = (""+cardNoIterator);
+					handler.close();
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -375,6 +378,7 @@ public class MainPage {
 					try {
 						QueryHandler handler = new QueryHandler();
 						handler.update("INSERT INTO BORROWER (Card_id, ssn, Bname, Address, Phone) Values ('"+libraryCard+"', '"+borrowerssn+"', '"+borrowerName+"', '"+borrowerAddress+"', '"+borrowerPhone+"')");
+						handler.close();
 					} catch (SQLException e1) {
 						e1.printStackTrace();
 					}
@@ -395,6 +399,7 @@ public class MainPage {
 		});
 		
 		newBorrower.setSize(500, 500);
+		newBorrower.repaint();
 		newBorrower.setLayout(null);
 		newBorrower.setVisible(true);
 	}
@@ -428,16 +433,28 @@ public class MainPage {
 			public void actionPerformed(ActionEvent e) {
 				JFrame popupWindow = new JFrame();
 				String messageText = "";
-				if(searchResults.get(index).getStatus()) {
-					messageText = ("This book is unavailable");
+				boolean isInCart = false;
+				for (int i = 0 ; i < checkoutCart.size(); i++) {
+					if (searchResults.get(index).getisbn().equals(checkoutCart.get(i).getisbn())) {
+						isInCart = true;
+					}
+				}
+				if (isInCart) {
+					messageText = ("This book is already in your cart.");
+				}
+				else if(searchResults.get(index).getStatus()) {
+					messageText = ("This book is unavailable.");
 				}
 				else if (checkoutCart.size() >= 3) {
-					messageText = ("You cannot rent more than 3 books");
+					messageText = ("You cannot rent more than 3 books.");
 				}
 				else {
-					messageText = (searchResults.get(index).getTitle()+" added to cart. Checkout with your library card");
+					messageText = (searchResults.get(index).getTitle()+" added to cart.");
 					searchResults.get(index).checkout();
 					checkoutCart.add(searchResults.get(index));
+					JLabel message2 = new JLabel("Checkout with your library card id.");
+					message2.setBounds(20, 40, 350, 50);
+					popupWindow.add(message2);
 				}
 				JLabel message = new JLabel(messageText);
 				message.setBounds(20, 20, 350, 50);

@@ -12,9 +12,11 @@ import java.util.Date;
 import java.util.Locale;
 
 public class Rentals {
-	private static JFrame window = new JFrame();
-	private static ArrayList<String> loanids = new ArrayList<String>();
-    public Rentals(String id) {
+	private static JFrame window;
+	private static ArrayList<Loan> loans;
+    public Rentals(final String id) {
+    	window = new JFrame();
+    	loans = new ArrayList<Loan>();
         window.setTitle("Rentals");
         //JButton newUser = new JButton("Create Account");
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
@@ -24,7 +26,6 @@ public class Rentals {
         //JButton confirm = new JButton("Confirm Checkout");
         //JButton search = new JButton("Search");
         //JTextField searchEntry = new JTextField();
-        ArrayList<Loan> loans = new ArrayList<Loan>();
         
 
         JLabel idLabel = new JLabel("ID "+ id); 
@@ -42,11 +43,11 @@ public class Rentals {
 				String isbn = getLoans.getString("Isbn");
 				String dateDue = getLoans.getString("Due_date");
 				String dateIn = getLoans.getString("Date_in");
+				String dateOut = getLoans.getString("Date_Out");
 				boolean hasFine = false;
 				ResultSet getFine = handler.query("SELECT * FROM FINES WHERE loan_id LIKE '"+loanId+"'");
 				hasFine = getFine.next();
-				loans.add(new Loan(loanId, isbn, dateDue, dateIn, hasFine));
-				loanids.add(loanId);
+				loans.add(new Loan(loanId, isbn, dateOut, dateDue, dateIn, hasFine));
 			}
 			handler.close();
 		} catch (SQLException e1) {
@@ -54,7 +55,7 @@ public class Rentals {
 		}
 		
         JLabel userName = new JLabel("Name: "+name);
-        userName.setBounds(10, 40, 100, 20);
+        userName.setBounds(10, 40, 500, 20);
         window.add(userName);
         
         idLabel.setBounds(10, 10, 100, 20);
@@ -70,13 +71,37 @@ public class Rentals {
             public void actionPerformed(ActionEvent e) {
             	try {
 					QueryHandler handler = new QueryHandler();
-					for (int i = 0 ; i< loanids.size(); i++) {
-	                	ResultSet getReturned = handler.query("SELECT * FROM LOANS WHERE loan_id LIKE '"+loanids.get(i)+"'");
-	                	String returnDate = getReturned.getString("Date_in");
-	                	if (returnDate.equals("STILL OUT")) {
-	                		handler.update(""); //TODO: modify entry with same id as loanids.get(i) to have today as date_in
+					for (int i = 0 ; i< loans.size(); i++) {
+	                	ResultSet getReturned = handler.query("SELECT * FROM BOOK_LOANS WHERE loan_id LIKE '"+loans.get(i).getId()+"'");
+	                	String returnDate = "";
+	                	while (getReturned.next()) {
+	                		returnDate = getReturned.getString("Date_in");
+	                	}
+	                	ResultSet getFine = handler.query("SELECT * FROM FINES WHERE Loan_id LIKE '"+loans.get(i).getId()+"'");
+						String hasFine = "FALSE";
+						while (getFine.next()) {
+							hasFine = getFine.getString("Paid");
+						}
+	                	if (returnDate.equals("STILL OUT") || hasFine.equals("FALSE")) {
+	                		SimpleDateFormat format = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+	                		Calendar currentDate = Calendar.getInstance();
+	                		
+	                		//delete entry from table and replace with new updated entry for a returned book
+	                		handler.update("DELETE FROM BOOK_LOANS WHERE loan_id LIKE '"+loans.get(i).getId()+"'"); 
+	                		handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loans.get(i).getId()+"', '"+loans.get(i).getIsbn()+"', '"+id+"', '"+loans.get(i).getDateOut()+"', '"+loans.get(i).getDueDate()+"', '"+format.format(currentDate.getTime())+"')"); 
 	                	}
 	                }
+					handler.close();
+					JFrame successfulReturn = new JFrame();
+			        JLabel message = new JLabel("Books succesfully returned.");
+			        message.setBounds(20, 10, 750, 30);
+			        
+
+			        successfulReturn.add(message);
+			        successfulReturn.setSize(400, 150);
+			        successfulReturn.setLayout(null);
+			        successfulReturn.setVisible(true);
+			        window.setVisible(false);
 				} 
             	catch (SQLException e1) {
 
@@ -92,9 +117,17 @@ public class Rentals {
             public void actionPerformed(ActionEvent e) {
             	try {
 					QueryHandler handler = new QueryHandler();
-					for (int i = 0 ; i< loanids.size(); i++) {
-						handler.update(""); //TODO: modify entry with same id as at loanids.get(i) to mark fine as paid
+					for (int i = 0 ; i< loans.size(); i++) {
+						ResultSet getFine = handler.query("SELECT * FROM FINES WHERE Loan_id LIKE '"+loans.get(i).getId()+"'");
+						String fineAmount = "";
+						while (getFine.next()) {
+							fineAmount = getFine.getString("Fine_amt");
+						}
+						///mark fine as paid by deleting entry and replacing with new entry where paid = true
+						handler.update("DELETE FROM FINES WHERE loan_id LIKE '"+loans.get(i).getId()+"'"); 
+						handler.update("INSERT INTO FINES (Loan_id, Fine_amt, Paid) Values ('"+loans.get(i).getId()+"', '"+fineAmount+"', '"+"TRUE"+"')");
 	                }
+					handler.close();
 				} 
             	catch (SQLException e1) {
 
@@ -182,13 +215,13 @@ public class Rentals {
         panel3.setLayout(new BoxLayout(panel3, BoxLayout.Y_AXIS));
         panel3.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         
-        int panelNum = 0;
         double sumOfFines = 0;
-        while (!loans.isEmpty()) {
-        	Loan temp = loans.remove(0);
-        	try {
+        try {
+        for (int i = 0; i < loans.size(); i++) {
+        	Loan currentLoan = loans.get(i);
+        	
         		QueryHandler handler = new QueryHandler();
-        		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+temp.getIsbn()+"'");
+        		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+currentLoan.getIsbn()+"'");
         		while (matchingIsbns.next()) {
         			String title = matchingIsbns.getString("Title");
         			String isbn = matchingIsbns.getString("Isbn");
@@ -204,7 +237,7 @@ public class Rentals {
         			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
         			checkedOut = bookLoaned.next();
         			BookPage panel = new BookPage(new Book(title, authorString, isbn, checkedOut));
-        			switch (panelNum) {
+        			switch (i) {
         				case 0:
         					panel.display(panel1);
         					break;
@@ -216,15 +249,16 @@ public class Rentals {
         					break;
         			}
         		}
+        		handler.close();
         		
-        		JLabel dueDateLabel = new JLabel("Due Date: " + temp.getDueDate());
-        		JLabel dateInLabel = new JLabel("Date in: "+ temp.getReturnDate());
-        		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+        		JLabel dueDateLabel = new JLabel("Due Date: " + currentLoan.getDueDate());
+        		JLabel dateInLabel = new JLabel("Date in: "+ currentLoan.getReturnDate());
+        		SimpleDateFormat format = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
         		long daysDifference = 0;
         		try {
-					Date dueDate = format.parse(temp.getDueDate());
-					Date dateIn = format.parse(temp.getDueDate());
-					daysDifference = (dateIn.getTime() - dateIn.getTime()) / (24 * 60 * 60 * 1000);
+					Date dueDate = format.parse(currentLoan.getDueDate());
+					Date dateIn = format.parse(currentLoan.getDueDate());
+					daysDifference = (dateIn.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000);
 				} catch (ParseException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -233,19 +267,21 @@ public class Rentals {
         		double fineAmount = daysDifference * 0.25;
         		JLabel fineLabel = new JLabel("Fine: $" + String.format("%.2f", fineAmount));
         		
-        		switch (panelNum) {
+        		switch (i) {
 				case 0:
-					dueDateLabel.setBounds(500, 125, 150, 20);
-					dateInLabel.setBounds(500, 150, 150, 20);
-					fineLabel.setBounds(500, 175, 150, 20);
+					dueDateLabel.setBounds(500, 125, 250, 20);
+					dateInLabel.setBounds(500, 150, 250, 20);
+					fineLabel.setBounds(500, 175, 250, 20);
 					break;
 				case 1:
-					dueDateLabel.setBounds(500, 375, 150, 20);
-					dateInLabel.setBounds(500, 400, 150, 20);
+					dueDateLabel.setBounds(500, 375, 250, 20);
+					dateInLabel.setBounds(500, 400, 250, 20);
+					fineLabel.setBounds(500, 425, 250, 20);
 					break;
 				case 2:
-					dueDateLabel.setBounds(500, 625, 150, 20);
-					dateInLabel.setBounds(500, 650, 150, 20);
+					dueDateLabel.setBounds(500, 625, 250, 20);
+					dateInLabel.setBounds(500, 650, 250, 20);
+					fineLabel.setBounds(500, 675, 250, 20);
 					break;
         		}
         		window.add(dueDateLabel);
@@ -255,17 +291,20 @@ public class Rentals {
         			sumOfFines += fineAmount;
         		}
         		
-        	} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+        	
         	}
-        	panelNum++;
         }
+        catch (SQLException e1) {
+
+			e1.printStackTrace();
+		}
+
 
         JLabel finesSumLabel = new JLabel("Fines ($0.25/day): $" + String.format("%.2f", sumOfFines));
         finesSumLabel.setBounds(500, 75, 250, 20);
         window.add(finesSumLabel);
         window.setSize(1000, 1000);
+        window.repaint();
         window.setLayout(null);
         window.setVisible(true);
     }
@@ -293,13 +332,15 @@ class Loan {
 	private String isbn;
 	private String dueDate;
 	private String returnDate;
+	private String dateOut;
 	private boolean finePaid;
-	public Loan(String getId, String getIsbn, String getDue, String getReturn, boolean getFine) {
+	public Loan(String getId, String getIsbn, String getDateOut, String getDue, String getReturn, boolean getFine) {
 		id = getId;
 		isbn = getIsbn;
 		dueDate = getDue;
 		returnDate = getReturn;
 		finePaid = getFine;
+		dateOut = getDateOut;
 	}
 	
 	public String getId() {
@@ -320,5 +361,9 @@ class Loan {
 	
 	public boolean getFine() {
 		return finePaid;
+	}
+	
+	public String getDateOut(){
+		return dateOut;
 	}
 }
