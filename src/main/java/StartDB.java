@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +16,11 @@ import java.util.Arrays;
 
 public class StartDB
 {
+    public static void main(String[] args) throws SQLException, IOException
+    {
+        start();
+    }
+
     public static void start() throws SQLException, IOException
     {
         QueryHandler DB = new QueryHandler();
@@ -24,8 +30,11 @@ public class StartDB
         wipeDB(DB);
         addAuthors(DB,books);
         addBooks(DB,books);
+        DB.update("DROP TABLE IF EXISTS BOOK_AUTHORS");
+        DB.update("CREATE TABLE IF NOT EXISTS BOOK_AUTHORS (Author_id INTEGER, Isbn TEXT, PRIMARY KEY(Author_id, Isbn))");
         addBookAuthors(DB,books);
         addBorrowers(DB,borrowers);
+        System.out.println("Done");
         DB.close();
     }
 
@@ -82,7 +91,7 @@ public class StartDB
     public static void addBookAuthors(QueryHandler DB, ArrayList<TBook> books) throws SQLException
     {
         String insertQuery = "INSERT INTO BOOK_AUTHORS (Isbn, Author_id) VALUES (?,?)";
-        ArrayList<String> pairs = new ArrayList<String>();
+        ArrayList<String> pairs = new ArrayList<>();
         PreparedStatement preparedStatement = DB.getConnection().prepareStatement(insertQuery);
         for (TBook book : books)
         {
@@ -90,8 +99,13 @@ public class StartDB
             {
                 if(!pairs.contains(book.isbn +" "+ author))
                 {
+                    String authorIDQuery = "SELECT Author_id FROM AUTHORS WHERE Name LIKE ? LIMIT 1";
+                    PreparedStatement authorStatement = DB.getConnection().prepareStatement(authorIDQuery);
+                    authorStatement.setString(1,author);
+                    ResultSet authorID = authorStatement.executeQuery();
+                    String authorNum = authorID.getString("Author_id");
                     preparedStatement.setString(1, book.isbn);
-                    preparedStatement.setString(2, author);
+                    preparedStatement.setString(2, authorNum);
                     preparedStatement.executeUpdate();
                     pairs.add(book.isbn +" "+ author);
                     System.out.println("Added book author: " + book.isbn + " " + author);
@@ -196,7 +210,7 @@ class TBorrower
     public String toString()
     {
         return "Borrower{" +
-               ", ssn='" + ssn + '\'' +
+               "  ssn='" + ssn + '\'' +
                ", bname='" + bname + '\'' +
                ", address='" + address + '\'' +
                ", phone='" + phone + '\'' +
