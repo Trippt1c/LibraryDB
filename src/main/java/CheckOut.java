@@ -12,8 +12,10 @@ import java.util.Date;
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
 	private static JFrame window = new JFrame();
-	private static ArrayList<Book> checkoutCart = new ArrayList<Book>();
+	private static ArrayList<Book> checkoutCart;
     public CheckOut(String libraryCard, ArrayList<Book> cartToEmpty) {
+    	window = new JFrame();
+    	checkoutCart = new ArrayList<Book>();
     	final String id = libraryCard;
         window.setTitle("Checkout");
         BookPage test = null;
@@ -25,12 +27,12 @@ public class CheckOut {
         	test = new BookPage(temp);
         	checkoutCart.add(temp);
         }
-        if (!checkoutCart.isEmpty()) {
+        if (!cartToEmpty.isEmpty()) {
         	Book temp = cartToEmpty.remove(0);
         	test2 = new BookPage(temp);
         	checkoutCart.add(temp);
         }
-        if (!checkoutCart.isEmpty()) {
+        if (!cartToEmpty.isEmpty()) {
         	Book temp = cartToEmpty.remove(0);
         	test3 = new BookPage(temp);
         	checkoutCart.add(temp);
@@ -70,7 +72,7 @@ public class CheckOut {
 		}
 		
         JLabel userName = new JLabel("Name: "+name);
-        userName.setBounds(10, 40, 100, 20);
+        userName.setBounds(10, 40, 500, 20);
         window.add(userName);
         
         JLabel numRentalsLabel = new JLabel("Books rented by this account: "+numRented);
@@ -93,16 +95,19 @@ public class CheckOut {
         JLabel tooManyBooks2 = new JLabel("Please return your rented books before cheking out more.");
         tooManyBooks.setBounds(475, 10, 350, 20);
         tooManyBooks2.setBounds(475, 20, 350, 20); 
+        window.add(tooManyBooks);
+    	window.add(tooManyBooks2);
         
         confirm.setBounds(475, 10, 150, 20); // was checkout
+        window.add(confirm);
         
         //Replace checkout button with error message if the user has more than 3 books
         if (numRented+checkoutCart.size() > 3) {
-        	window.add(tooManyBooks);
-        	window.add(tooManyBooks2);
+        	confirm.setVisible(false);
         }
         else {
-        	window.add(confirm);
+        	tooManyBooks.setVisible(false);
+        	tooManyBooks2.setVisible(false);
         }
         
         confirm.addActionListener(new ActionListener() {
@@ -120,16 +125,17 @@ public class CheckOut {
 			        ArrayList<Integer> forbiddenids = new ArrayList<Integer>();
 			        ResultSet getids = handler.query("SELECT * FROM BOOK_LOANS");
 					while (getids.next()) {
-						forbiddenids.add(Integer.valueOf(getids.getString("Card_id")));
+						forbiddenids.add(Integer.valueOf(getids.getString("Loan_id")));
 					}
-					while (!forbiddenids.contains(loanNoIterator) && !forbiddenids.isEmpty()) {
-						loanNoIterator++;
-					}
-					String loanid = (""+loanNoIterator);
 			        
 					while (!checkoutCart.isEmpty()) {
+						while (forbiddenids.contains(loanNoIterator) && !forbiddenids.isEmpty()) {
+							loanNoIterator++;
+						}
+						int loanid = loanNoIterator;
 						Book checkedOut = checkoutCart.remove(0);
-						handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loanid+"', '"+checkedOut.getisbn()+"', '"+id+"', '"+checkoutDate+"', '"+dueDate+"', "+"STILL OUT"+"')");
+						handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loanid+"', '"+checkedOut.getisbn()+"', '"+id+"', '"+checkoutDate+"', '"+dueDate+"', '"+"STILL OUT')");
+						forbiddenids.add(loanid);
 					}
 					handler.close();
 				} catch (SQLException e1) {
@@ -178,6 +184,7 @@ public class CheckOut {
         	test3.display(panel3);
         }
         window.setSize(1000, 1000);
+        window.repaint();
         window.setLayout(null);
         window.setVisible(true);
     }
@@ -199,8 +206,9 @@ public class CheckOut {
         popupLogin.setVisible(true);
     }*/
 
-    private static JFrame popupDueDate = new JFrame();
+    private static JFrame popupDueDate;
     public static void displayDueDateWindow() {
+    	popupDueDate = new JFrame();
         JLabel message = new JLabel(getDueDateMessage());
         JButton close = new JButton("Close");
         message.setBounds(20, 10, 750, 30);
@@ -216,6 +224,7 @@ public class CheckOut {
         popupDueDate.setSize(400, 150);
         popupDueDate.setLayout(null);
         popupDueDate.setVisible(true);
+        window.setVisible(false);
     }
 
     private static String getDueDateMessage() {

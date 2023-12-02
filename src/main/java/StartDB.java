@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 public class StartDB
 {
-    public static void restart() throws SQLException, IOException
+    public static void start() throws SQLException, IOException
     {
         QueryHandler DB = new QueryHandler();
         ArrayList<TBook> books = parseBooks("books.csv");
