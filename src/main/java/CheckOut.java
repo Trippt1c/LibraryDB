@@ -60,7 +60,7 @@ public class CheckOut {
 			}
 			
 			//get number of books rented
-			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"'");
+			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"' AND Date_in IS NULL");
 			while (rentedBooks.next()) {
 				numRented++;
 			}

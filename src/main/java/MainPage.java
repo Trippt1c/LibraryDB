@@ -182,7 +182,7 @@ public class MainPage {
 					authorString = authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%' AND Date_in IS NULL");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
@@ -201,7 +201,7 @@ public class MainPage {
 					authorString = authorString + authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%' AND Date_in IS NULL");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
@@ -223,7 +223,7 @@ public class MainPage {
 						authorString = authorString + authorNames.getString("Name");
 					}
 				}
-				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
+				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%' AND Date_in IS NULL");
 				checkedOut = bookLoaned.next();
 				searchResults.add(new Book(title, authorString, isbn, checkedOut));
 			}
