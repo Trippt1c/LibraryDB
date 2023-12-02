@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
@@ -61,7 +60,7 @@ public class CheckOut {
 			}
 			
 			//get number of books rented
-			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"'");
+			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"' AND Date_in IS NULL");
 			while (rentedBooks.next()) {
 				numRented++;
 			}
@@ -92,15 +91,15 @@ public class CheckOut {
 
 
         JLabel tooManyBooks = new JLabel("You can only rent 3 books at a time.");
-        JLabel tooManyBooks2 = new JLabel("Please return your rented books before cheking out more.");
+        JLabel tooManyBooks2 = new JLabel("Please return your rented books before checking out more.");
         tooManyBooks.setBounds(475, 10, 350, 20);
         tooManyBooks2.setBounds(475, 20, 350, 20); 
         window.add(tooManyBooks);
     	window.add(tooManyBooks2);
-        
+
         confirm.setBounds(475, 10, 150, 20); // was checkout
         window.add(confirm);
-        
+
         //Replace checkout button with error message if the user has more than 3 books
         if (numRented+checkoutCart.size() > 3) {
         	confirm.setVisible(false);
@@ -127,7 +126,7 @@ public class CheckOut {
 					while (getids.next()) {
 						forbiddenids.add(Integer.valueOf(getids.getString("Loan_id")));
 					}
-			        
+
 					while (!checkoutCart.isEmpty()) {
 						while (forbiddenids.contains(loanNoIterator) && !forbiddenids.isEmpty()) {
 							loanNoIterator++;
