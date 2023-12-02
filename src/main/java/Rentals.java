@@ -37,7 +37,7 @@ public class Rentals {
 			while (user.next()) {
 				name = user.getString("Bname");
 			}
-			ResultSet getLoans = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"'");
+			ResultSet getLoans = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"' AND Date_in LIKE '"+"STILL OUT"+"'");
 			while (getLoans.next()) {
 				String loanId = getLoans.getString("Loan_id");
 				String isbn = getLoans.getString("Isbn");
@@ -45,7 +45,7 @@ public class Rentals {
 				String dateIn = getLoans.getString("Date_in");
 				String dateOut = getLoans.getString("Date_Out");
 				boolean hasFine = false;
-				ResultSet getFine = handler.query("SELECT * FROM FINES WHERE loan_id LIKE '"+loanId+"'");
+				ResultSet getFine = handler.query("SELECT * FROM FINES WHERE Loan_id LIKE '"+loanId+"'");
 				hasFine = getFine.next();
 				loans.add(new Loan(loanId, isbn, dateOut, dateDue, dateIn, hasFine));
 			}
@@ -72,7 +72,7 @@ public class Rentals {
             	try {
 					QueryHandler handler = new QueryHandler();
 					for (int i = 0 ; i< loans.size(); i++) {
-	                	ResultSet getReturned = handler.query("SELECT * FROM BOOK_LOANS WHERE loan_id LIKE '"+loans.get(i).getId()+"'");
+	                	ResultSet getReturned = handler.query("SELECT * FROM BOOK_LOANS WHERE Loan_id LIKE '"+loans.get(i).getId()+"'");
 	                	String returnDate = "";
 	                	while (getReturned.next()) {
 	                		returnDate = getReturned.getString("Date_in");
@@ -87,13 +87,13 @@ public class Rentals {
 	                		Calendar currentDate = Calendar.getInstance();
 	                		
 	                		//delete entry from table and replace with new updated entry for a returned book
-	                		handler.update("DELETE FROM BOOK_LOANS WHERE loan_id LIKE '"+loans.get(i).getId()+"'"); 
-	                		handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loans.get(i).getId()+"', '"+loans.get(i).getIsbn()+"', '"+id+"', '"+loans.get(i).getDateOut()+"', '"+loans.get(i).getDueDate()+"', '"+format.format(currentDate.getTime())+"')"); 
+	                		handler.update("DELETE FROM BOOK_LOANS WHERE Loan_id LIKE '"+loans.get(i).getId()+"'");
+	                		handler.update("INSERT INTO BOOK_LOANS (Loan_id, Isbn, Card_id, Date_out, Due_date, Date_in) Values ('"+loans.get(i).getId()+"', '"+loans.get(i).getIsbn()+"', '"+id+"', '"+loans.get(i).getDateOut()+"', '"+loans.get(i).getDueDate()+"', '"+format.format(currentDate.getTime())+"')");
 	                	}
 	                }
 					handler.close();
 					JFrame successfulReturn = new JFrame();
-			        JLabel message = new JLabel("Books succesfully returned.");
+			        JLabel message = new JLabel("Books successfully returned.");
 			        message.setBounds(20, 10, 750, 30);
 			        
 

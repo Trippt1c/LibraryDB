@@ -91,7 +91,7 @@ public class CheckOut {
 
 
         JLabel tooManyBooks = new JLabel("You can only rent 3 books at a time.");
-        JLabel tooManyBooks2 = new JLabel("Please return your rented books before cheking out more.");
+        JLabel tooManyBooks2 = new JLabel("Please return your rented books before checking out more.");
         tooManyBooks.setBounds(475, 10, 350, 20);
         tooManyBooks2.setBounds(475, 20, 350, 20); 
         window.add(tooManyBooks);
