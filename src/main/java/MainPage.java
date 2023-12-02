@@ -168,6 +168,7 @@ public class MainPage {
         PreparedStatement statement = handler.getConnection().prepareStatement("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE ? AND Date_in IS NULL");
         statement.setString(1, isbn);
         ResultSet rs = statement.executeQuery();
+        handler.close();
         if (rs.next()) {
             return true;
         }
@@ -196,7 +197,7 @@ public class MainPage {
         }
 
         boolean checkedOut = isCheckedOut(isbn);
-
+        handler.close();
         return new Book(title, authorString, isbn, checkedOut);
     }
 
