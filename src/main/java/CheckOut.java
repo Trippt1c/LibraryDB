@@ -7,7 +7,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 // TODO: add functionality of validating a checkout (unavailable, already max checked out, etc.)
 public class CheckOut {
@@ -30,11 +29,6 @@ public class CheckOut {
         	test2 = new BookPage(temp);
         	checkoutCart.add(temp);
         }
-        if (!checkoutCart.isEmpty()) {
-        	Book temp = cartToEmpty.remove(0);
-        	test3 = new BookPage(temp);
-        	checkoutCart.add(temp);
-        }
         //JButton newUser = new JButton("Create Account");
         JButton mainPage = new JButton("Return to Main Page"); // use this button to return to main page
         JButton rentals = new JButton("View my rentals");
@@ -53,13 +47,13 @@ public class CheckOut {
 		try {
 			//get user name
 			QueryHandler handler = new QueryHandler();
-			ResultSet user = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
+			ResultSet user = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '%"+id+"%'");
 			while (user.next()) {
 				name = user.getString("Bname");
 			}
 			
 			//get number of books rented
-			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '"+id+"'");
+			ResultSet rentedBooks = handler.query("SELECT * FROM BOOK_LOANS WHERE Card_id LIKE '%"+id+"%'");
 			while (rentedBooks.next()) {
 				numRented++;
 			}
@@ -90,7 +84,7 @@ public class CheckOut {
 
 
         JLabel tooManyBooks = new JLabel("You can only rent 3 books at a time.");
-        JLabel tooManyBooks2 = new JLabel("Please return your rented books before cheking out more.");
+        JLabel tooManyBooks2 = new JLabel("Please return your rented books before checking out more.");
         tooManyBooks.setBounds(475, 10, 350, 20);
         tooManyBooks2.setBounds(475, 20, 350, 20); 
         

@@ -151,105 +151,65 @@ public class MainPage {
 	//Gets the search results from a query and stores them in the arraylist searchResults
 	public static void getSearchResults(String query) throws SQLException {
 		searchResults.clear();
-	
-		//test data 
-		/*searchResults.add(new Book("Book1","Author1","isbn1", false));
-		searchResults.add(new Book("Book2","Author2","isbn2", false));
-		searchResults.add(new Book("Book3","Author3","isbn3", false));
-		searchResults.add(new Book("Book4","Author4","isbn4", false));
-		searchResults.add(new Book("Book5","Author5","isbn5", false));
-		searchResults.add(new Book("Book6","Author6","isbn6", false));
-		searchResults.add(new Book("Book7","Author7","isbn7", false));
-		searchResults.add(new Book("Book8","Author8","isbn8", false));
-		searchResults.add(new Book("Book9","Author9","isbn9", false));
-		searchResults.add(new Book("Book10","Author10","isbn10", false));
-		searchResults.add(new Book("Book11","Author11","isbn11", false));
-		searchResults.add(new Book("Book12","Author12","isbn12", false));
-		searchResults.add(new Book("Book13","Author13","isbn13", false));
-		searchResults.add(new Book("Book14 very long title with many words","Author14 very long author name with many words","isbn14", true));
-		searchResults.add(new Book("Book15","Author15","isbn15", false));
-		searchResults.add(new Book("Book16","Author16","isbn16", false));
-		searchResults.add(new Book("Book17","Author17","isbn17", false));
-		searchResults.add(new Book("Book18","Author18","isbn18", false));
-		searchResults.add(new Book("Book19","Author19","isbn19", false));
-		searchResults.add(new Book("Book20","Author20","isbn20", false));
-		searchResults.add(new Book("Book21","Author21","isbn21", false));
-		searchResults.add(new Book("Book22","Author22","isbn22", false));
-		searchResults.add(new Book("Book23","Author23","isbn23", false));
-		searchResults.add(new Book("Book24","Author24","isbn24", false));
-		searchResults.add(new Book("Book25","Author25","isbn25", false));
-		searchResults.add(new Book("Book26","Author26","isbn26", false));
-		searchResults.add(new Book("Book27","Author27","isbn27", false));
-		searchResults.add(new Book("Book28","Author28","isbn28", false));
-		searchResults.add(new Book("Book29","Author29","isbn29", false));
-		searchResults.add(new Book("Book30","Author30","isbn30", false));
-		searchResults.add(new Book("Book31","Author31","isbn31", false));
-		searchResults.add(new Book("Book32","Author32","isbn32", false));
-		searchResults.add(new Book("Book33","Author33","isbn33", false));
-		searchResults.add(new Book("Book34","Author34","isbn34", false));
-		searchResults.add(new Book("Book35","Author35","isbn35", false));
-		*/
-		
-		//New code to get data from database. Doesn't throw any exceptions, but still unsure if it works properly yet
 
 		QueryHandler handler = new QueryHandler();
 		
 		//Search by title
-		ResultSet matchingTitles = handler.query("SELECT * FROM BOOK WHERE Title LIKE '"+query+"'");
+		ResultSet matchingTitles = handler.query("SELECT * FROM BOOK WHERE Title LIKE '%"+query+"%'");
 		while (matchingTitles.next()) {
 			String title = matchingTitles.getString("Title");
 			String isbn = matchingTitles.getString("Isbn");
 			String authorString = "";
 			boolean checkedOut = false;
-			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 			while (authorids.next()) {
-				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '%"+authorids.getString("Author_id")+"%'");
 				while (authorNames.next()) {
 					authorString = authorString + authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
 		
 		//Search by isbn
-		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		ResultSet matchingIsbns = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+query+"%'");
 		while (matchingIsbns.next()) {
 			String title = matchingIsbns.getString("Title");
 			String isbn = matchingIsbns.getString("Isbn");
 			String authorString = "";
 			boolean checkedOut = false;
-			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 			while (authorids.next()) {
 				ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
 				while (authorNames.next()) {
 					authorString = authorString + authorNames.getString("Name");
 				}
 			}
-			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+			ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 			checkedOut = bookLoaned.next();
 			searchResults.add(new Book(title, authorString, isbn, checkedOut));
 		}
 			
 		//Search by author
-		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+query+"'");
+		ResultSet matchingAuthors = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+query+"%'");
 		while (matchingAuthors.next()) {
-			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '"+matchingAuthors.getString("Author_id")+"'");
-			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '"+matchingAuthorid.getString("Isbn")+"'");
+			ResultSet matchingAuthorid = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Author_id LIKE '%"+matchingAuthors.getString("Author_id")+"%'");
+			ResultSet booksByThisAuthor = handler.query("SELECT * FROM BOOK WHERE Isbn LIKE '%"+matchingAuthorid.getString("Isbn")+"%'");
 			while (booksByThisAuthor.next()) {
 				String title = matchingIsbns.getString("Title");
 				String isbn = matchingIsbns.getString("Isbn");
 				String authorString = "";
 				boolean checkedOut = false;
-				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '"+isbn+"'");
+				ResultSet authorids = handler.query("SELECT * FROM BOOK_AUTHORS WHERE Isbn LIKE '%"+isbn+"%'");
 				while (authorids.next()) {
-					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '"+authorids.getString("Author_id")+"'");
+					ResultSet authorNames = handler.query("SELECT * FROM AUTHORS WHERE Author_id LIKE '%"+authorids.getString("Author_id")+"%'");
 					while (authorNames.next()) {
 						authorString = authorString + authorNames.getString("Name");
 					}
 				}
-				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '"+isbn+"'");
+				ResultSet bookLoaned = handler.query("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE '%"+isbn+"%'");
 				checkedOut = bookLoaned.next();
 				searchResults.add(new Book(title, authorString, isbn, checkedOut));
 			}
@@ -281,7 +241,7 @@ public class MainPage {
 				boolean foundMatch = false;
 				try {
 					QueryHandler handler = new QueryHandler();
-					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '"+id+"'");
+					ResultSet getid = handler.query("SELECT * FROM BORROWER WHERE Card_id LIKE '%"+id+"%'");
 					foundMatch = getid.next();
 					//foundMatch = true;
 					handler.close();
