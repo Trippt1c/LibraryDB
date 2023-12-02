@@ -165,7 +165,7 @@ public class MainPage {
 
     public static boolean isCheckedOut(String isbn) throws SQLException {
         QueryHandler handler = new QueryHandler();
-        PreparedStatement statement = handler.getConnection().prepareStatement("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE ? AND Date_in IS NULL");
+        PreparedStatement statement = handler.getConnection().prepareStatement("SELECT * FROM BOOK_LOANS WHERE Isbn LIKE ? AND Date_in LIKE 'STILL OUT'");
         statement.setString(1, isbn);
         ResultSet rs = statement.executeQuery();
         handler.close();
